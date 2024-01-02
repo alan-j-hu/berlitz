@@ -31,13 +31,24 @@ int main(int argc, char* argv[])
 
   WGPUSurface surface = wgpu::glfw::CreateSurfaceForWindow(instance, window)
     .MoveToCHandle();
-  PlatContext ctx = PlatCreateContext(instance);
+  PlatContext ctx = PlatCreateContext(instance, surface);
 
   while(!glfwWindowShouldClose(window)) {
     glfwPollEvents();
+    PlatRenderTarget target = PlatContextGetRenderTarget(ctx);
+    if (!PlatRenderTargetOk(target)) {
+      PlatContextDestroy(ctx);
+      wgpuInstanceRelease(instance);
+      glfwDestroyWindow(window);
+      glfwTerminate();
+    }
+    PlatContextClearRenderTarget(ctx, target, (WGPUColor){
+      .r = 1.0, .g = 1.0, .b = 0.0, .a = 1.0 });
+    PlatRenderTargetDestroy(target);
+    PlatContextPresent(ctx);
   }
 
-  PlatDestroyContext(ctx);
+  PlatContextDestroy(ctx);
 
   wgpuInstanceRelease(instance);
 
