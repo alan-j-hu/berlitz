@@ -1,20 +1,6 @@
 #include <stdlib.h>
 #include "platinum/platinum.h"
-#include "shader.h"
-
-struct PlatRenderTargetImpl {
-  WGPUTextureView view;
-};
-
-struct PlatContextImpl {
-  WGPUInstance instance;
-  WGPUSurface surface;
-  WGPUAdapter adapter;
-  WGPUDevice device;
-  /* Latest WebGPU spec uses SurfaceTexture instead, but Dawn has not
-     caught up */
-  WGPUSwapChain swapchain;
-};
+#include "platinum_impl.h"
 
 typedef struct AdapterCallbackEnv {
   WGPUAdapter adapter;
@@ -85,10 +71,6 @@ PlatContext PlatCreateContext(WGPUInstance instance, WGPUSurface surface)
   }
 
   {
-    char* c = shader;
-  }
-
-  {
     WGPUSwapChainDescriptor desc = {0};
     desc.nextInChain = NULL;
     desc.width = 100;
@@ -101,6 +83,18 @@ PlatContext PlatCreateContext(WGPUInstance instance, WGPUSurface surface)
       wgpuDeviceCreateSwapChain(ctx->device, ctx->surface, &desc);
     ctx->swapchain = swapchain;
   }
+
+  {
+    WGPUBufferDescriptor desc = {0};
+    desc.nextInChain = NULL;
+    desc.size = sizeof(float);
+    desc.usage = WGPUBufferUsage_CopyDst | WGPUBufferUsage_Uniform;
+    desc.mappedAtCreation = false;
+    WGPUBuffer buffer = wgpuDeviceCreateBuffer(ctx->device, &desc);
+    ctx->uniform_buffer = buffer;
+  }
+
+
 
   return ctx;
 }

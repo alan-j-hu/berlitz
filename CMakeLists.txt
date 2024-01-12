@@ -7,23 +7,24 @@ add_subdirectory(third_party)
 
 add_custom_command(
   OUTPUT
-  "${CMAKE_CURRENT_BINARY_DIR}/src/shader.gen.c"
+  "${CMAKE_CURRENT_BINARY_DIR}/src/3d/shader.gen.c"
   COMMAND
   "sh"
   "${CMAKE_CURRENT_SOURCE_DIR}/embed.sh"
-  "${CMAKE_CURRENT_SOURCE_DIR}/src/shader.wgsl"
-  "${CMAKE_CURRENT_BINARY_DIR}/src/shader.gen.c"
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/3d/shader.wgsl"
+  "${CMAKE_CURRENT_BINARY_DIR}/src/3d/shader.gen.c"
   DEPENDS
   "${CMAKE_CURRENT_SOURCE_DIR}/embed.sh"
-  "${CMAKE_CURRENT_SOURCE_DIR}/src/shader.wgsl")
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/3d/shader.wgsl")
 
 add_custom_target(generate_shaders ALL
   DEPENDS
-  "${CMAKE_CURRENT_BINARY_DIR}/src/shader.gen.c")
+  "${CMAKE_CURRENT_BINARY_DIR}/src/3d/shader.gen.c")
 
 add_library(platinum
   src/platinum.c
-  "${CMAKE_CURRENT_BINARY_DIR}/src/shader.gen.c")
+  src/3d/pipeline.c
+  "${CMAKE_CURRENT_BINARY_DIR}/src/3d/shader.gen.c")
 add_dependencies(platinum generate_shaders)
 target_include_directories(platinum PUBLIC include)
 target_link_libraries(platinum
