@@ -1,7 +1,6 @@
 #include <stdlib.h>
 #include "platinum/platinum.h"
 #include "../platinum_impl.h"
-#include "shader.h"
 
 struct Pipeline3D {
   WGPUBindGroupLayout bind_group_layout;
@@ -11,7 +10,10 @@ struct Pipeline3D {
 void PlatPipeline3D(PlatContext ctx, struct Pipeline3D* pipeline)
 {
   {
-    char* c = shader;
+    char* c = {
+#include "3d/shader.gen"
+      0x00
+    };
   }
 
   {
