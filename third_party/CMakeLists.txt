@@ -1,3 +1,5 @@
+add_subdirectory(cglm)
+
 add_subdirectory(dawn)
 
 set(DAWN_FETCH_DEPENDENCIES ON)

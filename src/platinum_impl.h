@@ -2,12 +2,15 @@
 #define PLATINUM_IMPL_H
 
 #include "platinum/platinum.h"
+#include "3d/3d_impl.h"
 
 struct PlatRenderTargetImpl {
   WGPUTextureView view;
 };
 
 struct PlatContextImpl {
+  LogCallback log;
+
   WGPUInstance instance;
   WGPUSurface surface;
   WGPUAdapter adapter;
@@ -16,6 +19,8 @@ struct PlatContextImpl {
      caught up */
   WGPUSwapChain swapchain;
   WGPUBuffer uniform_buffer;
+
+  struct PlatPipeline3d pipeline_3d;
 };
 
 #endif

@@ -1,9 +1,15 @@
 #include "webgpu/webgpu.h"
 #include "platinum/platinum.h"
+#include <iostream>
 #include <GLFW/glfw3.h>
 #include "dawn/dawn_proc.h"
 #include "dawn/native/DawnNative.h"
 #include "webgpu/webgpu_glfw.h"
+
+void debug_log(const char* message)
+{
+  std::cerr << message << std::flush;
+}
 
 int main(int argc, char* argv[])
 {
@@ -31,7 +37,11 @@ int main(int argc, char* argv[])
 
   WGPUSurface surface = wgpu::glfw::CreateSurfaceForWindow(instance, window)
     .MoveToCHandle();
-  PlatContext ctx = PlatCreateContext(instance, surface);
+  PlatContextParams params {};
+  params.instance = instance;
+  params.surface = surface;
+  params.log = debug_log;
+  PlatContext ctx = PlatCreateContext(&params);
 
   while(!glfwWindowShouldClose(window)) {
     glfwPollEvents();

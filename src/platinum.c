@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <stdlib.h>
 #include "platinum/platinum.h"
 #include "platinum_impl.h"
@@ -40,18 +41,25 @@ void deviceCallback(
   }
 }
 
-PlatContext PlatCreateContext(WGPUInstance instance, WGPUSurface surface)
+void deviceUncapturedErrorCallback(
+  WGPUErrorType type, char const * message, void * userdata)
 {
-  struct PlatContextImpl* ctx = malloc(sizeof(struct PlatContextImpl));
-  ctx->instance = instance;
-  ctx->surface = surface;
+  PlatContext ctx = (PlatContext) userdata;
+  ctx->log(message);
+}
+
+PlatContext PlatCreateContext(PlatContextParams* params)
+{
+  PlatContext ctx = malloc(sizeof(struct PlatContextImpl));
+  ctx->instance = params->instance;
+  ctx->surface = params->surface;
 
   {
     WGPURequestAdapterOptions options = {0};
     options.nextInChain = NULL;
-    options.compatibleSurface = surface;
+    options.compatibleSurface = ctx->surface;
     AdapterCallbackEnv env = {0};
-    wgpuInstanceRequestAdapter(instance, &options, adapterCallback, &env);
+    wgpuInstanceRequestAdapter(ctx->instance, &options, adapterCallback, &env);
     while (!env.ended);
     ctx->adapter = env.adapter;
   }
@@ -68,6 +76,12 @@ PlatContext PlatCreateContext(WGPUInstance instance, WGPUSurface surface)
     wgpuAdapterRequestDevice(ctx->adapter, &desc, deviceCallback, &env);
     while (!env.ended);
     ctx->device = env.device;
+  }
+
+  ctx->log = params->log;
+  if (ctx->log != NULL) {
+    wgpuDeviceSetUncapturedErrorCallback(
+      ctx->device, deviceUncapturedErrorCallback, ctx);
   }
 
   {
@@ -94,13 +108,15 @@ PlatContext PlatCreateContext(WGPUInstance instance, WGPUSurface surface)
     ctx->uniform_buffer = buffer;
   }
 
-
+  PlatPipeline3DInit(ctx, &ctx->pipeline_3d);
 
   return ctx;
 }
 
 void PlatContextDestroy(PlatContext ctx)
 {
+  PlatPipeline3DDeinit(&ctx->pipeline_3d);
+
   wgpuSwapChainRelease(ctx->swapchain);
   wgpuDeviceRelease(ctx->device);
   wgpuAdapterRelease(ctx->adapter);

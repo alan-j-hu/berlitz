@@ -1,20 +1,45 @@
 #include <stdlib.h>
+#include "cglm/vec3.h"
 #include "platinum/platinum.h"
 #include "../platinum_impl.h"
+#include "3d_impl.h"
 
-struct Pipeline3D {
-  WGPUBindGroupLayout bind_group_layout;
-  WGPUPipelineLayout pipeline_layout;
-};
-
-void PlatPipeline3D(PlatContext ctx, struct Pipeline3D* pipeline)
+void PlatPipeline3DInit(PlatContext ctx, struct PlatPipeline3d* pipeline)
 {
-  {
-    char* c = {
+  char code[] = {
 #include "3d/shader.gen"
-      0x00
-    };
-  }
+    0x00
+  };
+  WGPUShaderModuleWGSLDescriptor wgsl_desc = {
+    .chain = {
+      .next = NULL,
+      .sType = WGPUSType_ShaderModuleWGSLDescriptor
+    },
+    .code = code
+  };
+
+  WGPUShaderModuleDescriptor shader_desc = {
+    .nextInChain = &wgsl_desc.chain,
+    .label = "3d shader"
+  };
+
+  pipeline->shader_module =
+    wgpuDeviceCreateShaderModule(ctx->device, &shader_desc);
+
+  WGPUVertexAttribute vertex_attrs[1] = {0};
+  vertex_attrs[0] = (struct WGPUVertexAttribute){
+    .shaderLocation = 0,
+    .format = WGPUVertexFormat_Float32x3,
+    .offset = 0
+  };
+
+  WGPUVertexBufferLayout vert_buf_layouts[1] = {0};
+  vert_buf_layouts[0] = (struct WGPUVertexBufferLayout){
+    .attributeCount = 1,
+    .attributes = vertex_attrs,
+    .arrayStride = sizeof(struct Vertex),
+    .stepMode = WGPUVertexStepMode_Vertex
+  };
 
   {
     WGPUBindGroupLayoutEntry entries[1] = {0};
@@ -38,10 +63,46 @@ void PlatPipeline3D(PlatContext ctx, struct Pipeline3D* pipeline)
       wgpuDeviceCreateBindGroupLayout(ctx->device, &layout_desc);
   }
 
-  WGPUPipelineLayoutDescriptor desc = {0};
-  desc.nextInChain = NULL;
-  desc.bindGroupLayoutCount = 1;
-  desc.bindGroupLayouts = &pipeline->bind_group_layout;
-  pipeline->pipeline_layout =
-    wgpuDeviceCreatePipelineLayout(ctx->device, &desc);
+  {
+    WGPUPipelineLayoutDescriptor desc = {
+      .nextInChain = NULL,
+      .label = "3d pipeline layout",
+      /*.bindGroupLayoutCount = 1,
+      .bindGroupLayouts = &pipeline->bind_group_layout*/
+    };
+
+    pipeline->pipeline_layout =
+      wgpuDeviceCreatePipelineLayout(ctx->device, &desc);
+  }
+
+  WGPUFragmentState frag_state = {
+    .nextInChain = NULL,
+    .module = pipeline->shader_module,
+    .entryPoint = "fs_main"
+  };
+
+  WGPURenderPipelineDescriptor desc = {
+    .nextInChain = NULL,
+    .label = "3d pipeline",
+    .layout = pipeline->pipeline_layout,
+    .vertex = {
+      .nextInChain = NULL,
+      .module = pipeline->shader_module,
+      .entryPoint = "vs_main",
+      .bufferCount = 1,
+      .buffers = vert_buf_layouts
+    },
+    .fragment = &frag_state
+  };
+
+  pipeline->render_pipeline =
+    wgpuDeviceCreateRenderPipeline(ctx->device, &desc);
+}
+
+void PlatPipeline3DDeinit(struct PlatPipeline3d* pipeline)
+{
+  wgpuRenderPipelineRelease(pipeline->render_pipeline);
+  wgpuPipelineLayoutRelease(pipeline->pipeline_layout);
+  wgpuBindGroupLayoutRelease(pipeline->bind_group_layout);
+  wgpuShaderModuleRelease(pipeline->shader_module);
 }

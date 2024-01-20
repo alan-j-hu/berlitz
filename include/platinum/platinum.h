@@ -11,7 +11,15 @@ extern "C" {
 typedef struct PlatContextImpl* PlatContext;
 typedef struct PlatRenderTargetImpl* PlatRenderTarget;
 
-PlatContext PlatCreateContext(WGPUInstance instance, WGPUSurface surface);
+typedef void (*LogCallback)(const char* message);
+
+typedef struct PlatContextParams {
+  WGPUInstance instance;
+  WGPUSurface surface;
+  LogCallback log;
+} PlatContextParams;
+
+PlatContext PlatCreateContext(PlatContextParams*);
 void PlatContextDestroy(PlatContext);
 PlatRenderTarget PlatContextGetRenderTarget(PlatContext);
 void PlatContextPresent(PlatContext);

@@ -28,6 +28,7 @@ add_dependencies(platinum generate_shaders)
 target_include_directories(platinum PUBLIC include
   PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/src")
 target_link_libraries(platinum
+  cglm
   dawn_common)
 
 add_executable(demo
