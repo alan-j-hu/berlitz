@@ -176,11 +176,13 @@ void PlatContextClearRenderTarget(
 
   WGPURenderPassEncoder render_pass =
     wgpuCommandEncoderBeginRenderPass(encoder, &desc);
+  wgpuRenderPassEncoderSetPipeline(
+    render_pass, ctx->pipeline_3d.render_pipeline);
   wgpuRenderPassEncoderEnd(render_pass);
   wgpuRenderPassEncoderRelease(render_pass);
 
   WGPUQueue queue = wgpuDeviceGetQueue(ctx->device);
-  WGPUCommandBufferDescriptor cmd_desc = {};
+  WGPUCommandBufferDescriptor cmd_desc = {0};
   cmd_desc.nextInChain = NULL;
   cmd_desc.label = "Command buffer";
   WGPUCommandBuffer command = wgpuCommandEncoderFinish(encoder, &cmd_desc);

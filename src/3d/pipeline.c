@@ -75,10 +75,31 @@ void PlatPipeline3DInit(PlatContext ctx, struct PlatPipeline3d* pipeline)
       wgpuDeviceCreatePipelineLayout(ctx->device, &desc);
   }
 
+  WGPUBlendState blend = {
+    .color= {
+      .operation = WGPUBlendOperation_Add,
+      .srcFactor = WGPUBlendFactor_One,
+      .dstFactor = WGPUBlendFactor_One
+    },
+    .alpha = {
+      .operation = WGPUBlendOperation_Add,
+      .srcFactor = WGPUBlendFactor_One,
+      .dstFactor = WGPUBlendFactor_One
+    }
+  };
+
+  WGPUColorTargetState color_target = {
+    .format = WGPUTextureFormat_BGRA8Unorm,
+    .blend = &blend,
+    .writeMask = WGPUColorWriteMask_All
+  };
+
   WGPUFragmentState frag_state = {
     .nextInChain = NULL,
     .module = pipeline->shader_module,
-    .entryPoint = "fs_main"
+    .entryPoint = "fs_main",
+    .targetCount = 1,
+    .targets = &color_target
   };
 
   WGPURenderPipelineDescriptor desc = {
@@ -91,6 +112,12 @@ void PlatPipeline3DInit(PlatContext ctx, struct PlatPipeline3d* pipeline)
       .entryPoint = "vs_main",
       .bufferCount = 1,
       .buffers = vert_buf_layouts
+    },
+    .multisample = {
+      .nextInChain = NULL,
+      .count = 1,
+      .mask = ~0u,
+      .alphaToCoverageEnabled = false
     },
     .fragment = &frag_state
   };
