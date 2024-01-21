@@ -14,24 +14,26 @@ PlatMesh PlatMeshCreate(
   WGPUBufferDescriptor vdesc = {
     .nextInChain = NULL,
     .label = "",
-    .usage = WGPUBufferUsage_CopyDst | WGPUBufferUsage_CopySrc,
+    .usage = WGPUBufferUsage_CopyDst | WGPUBufferUsage_Vertex,
     .size = vc * sizeof(PlatVertex),
     .mappedAtCreation = false
   };
   WGPUBuffer vbuf = wgpuDeviceCreateBuffer(ctx->device, &vdesc);
   wgpuQueueWriteBuffer(queue, vbuf, 0, vertices, vdesc.size);
   mesh->vertices = vbuf;
+  mesh->vertices_count = vc;
 
   WGPUBufferDescriptor idesc = {
     .nextInChain = NULL,
     .label = "",
-    .usage = WGPUBufferUsage_CopyDst | WGPUBufferUsage_CopySrc,
+    .usage = WGPUBufferUsage_CopyDst | WGPUBufferUsage_Index,
     .size = ic * sizeof(uint32_t),
     .mappedAtCreation = false
   };
   WGPUBuffer ibuf = wgpuDeviceCreateBuffer(ctx->device, &idesc);
   wgpuQueueWriteBuffer(queue, ibuf, 0, indices, idesc.size);
   mesh->indices = ibuf;
+  mesh->indices_count = ic;
 
   return mesh;
 }

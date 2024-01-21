@@ -75,16 +75,17 @@ void PlatPipeline3DInit(PlatContext ctx, struct PlatPipeline3d* pipeline)
       wgpuDeviceCreatePipelineLayout(ctx->device, &desc);
   }
 
+  /* TODO: Learn about different blend formulas */
   WGPUBlendState blend = {
     .color= {
       .operation = WGPUBlendOperation_Add,
-      .srcFactor = WGPUBlendFactor_One,
-      .dstFactor = WGPUBlendFactor_One
+      .srcFactor = WGPUBlendFactor_Src,
+      .dstFactor = WGPUBlendFactor_Zero
     },
     .alpha = {
       .operation = WGPUBlendOperation_Add,
-      .srcFactor = WGPUBlendFactor_One,
-      .dstFactor = WGPUBlendFactor_One
+      .srcFactor = WGPUBlendFactor_Src,
+      .dstFactor = WGPUBlendFactor_Zero
     }
   };
 
@@ -112,6 +113,12 @@ void PlatPipeline3DInit(PlatContext ctx, struct PlatPipeline3d* pipeline)
       .entryPoint = "vs_main",
       .bufferCount = 1,
       .buffers = vert_buf_layouts
+    },
+    .primitive = {
+      .topology = WGPUPrimitiveTopology_TriangleList,
+      .stripIndexFormat = WGPUIndexFormat_Undefined,
+      .frontFace = WGPUFrontFace_CCW,
+      .cullMode = WGPUCullMode_None,
     },
     .multisample = {
       .nextInChain = NULL,

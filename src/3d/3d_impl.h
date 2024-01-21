@@ -12,7 +12,9 @@ void PlatPipeline3DInit(PlatContext ctx, struct PlatPipeline3d* pipeline);
 void PlatPipeline3DDeinit(struct PlatPipeline3d* pipeline);
 
 struct PlatMeshImpl {
+  size_t vertices_count;
   WGPUBuffer vertices;
+  size_t indices_count;
   WGPUBuffer indices;
 };
 

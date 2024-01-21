@@ -10,6 +10,10 @@ extern "C" {
 #include "webgpu/webgpu.h"
 
 typedef struct PlatContextImpl* PlatContext;
+typedef struct PlatRenderTargetImpl* PlatRenderTarget;
+typedef struct PlatEncoderImpl* PlatEncoder;
+typedef struct PlatMeshImpl* PlatMesh;
+typedef struct PlatMeshBuilderImpl* PlatMeshBuilder;
 
 typedef void (*LogCallback)(const char* message);
 
@@ -24,23 +28,17 @@ PlatContext PlatCreateContext(PlatContextParams*);
 void PlatContextDestroy(PlatContext);
 void PlatContextPresent(PlatContext);
 
-typedef struct PlatRenderTargetImpl* PlatRenderTarget;
-
 PlatRenderTarget PlatContextGetRenderTarget(PlatContext);
 void PlatRenderTargetDestroy(PlatRenderTarget);
 bool PlatRenderTargetOk(PlatRenderTarget);
 
-typedef struct PlatEncoderImpl* PlatEncoder;
-
 PlatEncoder PlatEncoderCreate(PlatContext, PlatRenderTarget);
 void PlatEncoderDestroy(PlatContext, PlatEncoder);
+void PlatEncoderDrawMesh(PlatEncoder, PlatMesh);
 
 typedef struct PlatVertex {
   vec3 pos;
 } PlatVertex;
-
-typedef struct PlatMeshImpl* PlatMesh;
-typedef struct PlatMeshBuilderImpl* PlatMeshBuilder;
 
 PlatMesh PlatMeshCreate(
   PlatContext ctx,

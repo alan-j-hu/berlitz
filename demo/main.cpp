@@ -74,6 +74,7 @@ int main(int argc, char* argv[])
       glfwTerminate();
     }
     PlatEncoder encoder = PlatEncoderCreate(ctx, target);
+    PlatEncoderDrawMesh(encoder, mesh);
     PlatEncoderDestroy(ctx, encoder);
     PlatRenderTargetDestroy(target);
     PlatContextPresent(ctx);

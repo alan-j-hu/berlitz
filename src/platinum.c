@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include "platinum/platinum.h"
 #include "platinum_impl.h"
+#include "3d/3d_impl.h"
 
 typedef struct AdapterCallbackEnv {
   WGPUAdapter adapter;
@@ -135,6 +136,7 @@ PlatRenderTarget PlatContextGetRenderTarget(PlatContext ctx)
 void PlatContextPresent(PlatContext ctx)
 {
   wgpuSwapChainPresent(ctx->swapchain);
+  wgpuDeviceTick(ctx->device);
 }
 
 void PlatRenderTargetDestroy(PlatRenderTarget target)
@@ -150,6 +152,7 @@ bool PlatRenderTargetOk(PlatRenderTarget target)
 
 PlatEncoder PlatEncoderCreate(PlatContext ctx, PlatRenderTarget target)
 {
+  /* TODO: This is allocated in loop, see if I can cache or pool it */
   PlatEncoder plat_encoder = malloc(sizeof(struct PlatEncoderImpl));
 
   WGPUCommandEncoderDescriptor enc_desc = {0};
@@ -198,4 +201,16 @@ void PlatEncoderDestroy(PlatContext ctx, PlatEncoder encoder)
   wgpuCommandEncoderRelease(encoder->encoder);
   wgpuCommandBufferRelease(command);
   free(encoder);
+}
+
+void PlatEncoderDrawMesh(PlatEncoder encoder, PlatMesh mesh)
+{
+  wgpuRenderPassEncoderSetVertexBuffer(
+    encoder->render_pass, 0,
+    mesh->vertices, 0, mesh->vertices_count * sizeof(PlatVertex));
+  wgpuRenderPassEncoderSetIndexBuffer(
+    encoder->render_pass, mesh->indices,
+    WGPUIndexFormat_Uint32, 0, mesh->indices_count * sizeof(uint32_t));
+  wgpuRenderPassEncoderDrawIndexed(
+    encoder->render_pass, mesh->indices_count, 1, 0, 0, 0);
 }
