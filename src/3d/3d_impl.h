@@ -1,12 +1,6 @@
 #ifndef PLATINUM_3D_IMPL_H
 #define PLATINUM_3D_IMPL_H
 
-#include "cglm/vec3.h"
-
-struct Vertex {
-  vec3 pos;
-};
-
 struct PlatPipeline3d {
   WGPUShaderModule shader_module;
   WGPUBindGroupLayout bind_group_layout;
@@ -16,5 +10,13 @@ struct PlatPipeline3d {
 
 void PlatPipeline3DInit(PlatContext ctx, struct PlatPipeline3d* pipeline);
 void PlatPipeline3DDeinit(struct PlatPipeline3d* pipeline);
+
+struct PlatMeshImpl {
+  WGPUBuffer vertices;
+  WGPUBuffer indices;
+};
+
+struct PlatMeshBuilderImpl {
+};
 
 #endif

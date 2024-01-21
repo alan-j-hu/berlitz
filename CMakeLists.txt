@@ -23,6 +23,7 @@ add_custom_target(generate_shaders ALL
 
 add_library(platinum
   src/platinum.c
+  src/3d/mesh.c
   src/3d/pipeline.c)
 add_dependencies(platinum generate_shaders)
 target_include_directories(platinum PUBLIC include

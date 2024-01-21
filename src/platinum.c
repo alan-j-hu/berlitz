@@ -53,6 +53,7 @@ PlatContext PlatCreateContext(PlatContextParams* params)
   PlatContext ctx = malloc(sizeof(struct PlatContextImpl));
   ctx->instance = params->instance;
   ctx->surface = params->surface;
+  ctx->clear_color = params->clear_color;
 
   {
     WGPURequestAdapterOptions options = {0};
@@ -147,16 +148,16 @@ bool PlatRenderTargetOk(PlatRenderTarget target)
   return !!target->view;
 }
 
-void PlatContextClearRenderTarget(
-  PlatContext ctx,
-  PlatRenderTarget target,
-  WGPUColor color)
+PlatEncoder PlatEncoderCreate(PlatContext ctx, PlatRenderTarget target)
 {
+  PlatEncoder plat_encoder = malloc(sizeof(struct PlatEncoderImpl));
+
   WGPUCommandEncoderDescriptor enc_desc = {0};
   enc_desc.nextInChain = NULL;
   enc_desc.label = "Encoder";
   WGPUCommandEncoder encoder =
     wgpuDeviceCreateCommandEncoder(ctx->device, &enc_desc);
+  plat_encoder->encoder = encoder;
 
   WGPURenderPassDescriptor desc = {0};
   desc.nextInChain = NULL;
@@ -169,7 +170,7 @@ void PlatContextClearRenderTarget(
   color_attachment.depthSlice = WGPU_DEPTH_SLICE_UNDEFINED;
   color_attachment.loadOp = WGPULoadOp_Clear;
   color_attachment.storeOp = WGPUStoreOp_Store;
-  color_attachment.clearValue = color;
+  color_attachment.clearValue = ctx->clear_color;
   desc.colorAttachmentCount = 1;
   desc.colorAttachments = &color_attachment;
   desc.depthStencilAttachment = NULL;
@@ -178,15 +179,23 @@ void PlatContextClearRenderTarget(
     wgpuCommandEncoderBeginRenderPass(encoder, &desc);
   wgpuRenderPassEncoderSetPipeline(
     render_pass, ctx->pipeline_3d.render_pipeline);
-  wgpuRenderPassEncoderEnd(render_pass);
-  wgpuRenderPassEncoderRelease(render_pass);
+  plat_encoder->render_pass = render_pass;
+  return plat_encoder;
+}
+
+void PlatEncoderDestroy(PlatContext ctx, PlatEncoder encoder)
+{
+  wgpuRenderPassEncoderEnd(encoder->render_pass);
+  wgpuRenderPassEncoderRelease(encoder->render_pass);
 
   WGPUQueue queue = wgpuDeviceGetQueue(ctx->device);
   WGPUCommandBufferDescriptor cmd_desc = {0};
   cmd_desc.nextInChain = NULL;
   cmd_desc.label = "Command buffer";
-  WGPUCommandBuffer command = wgpuCommandEncoderFinish(encoder, &cmd_desc);
+  WGPUCommandBuffer command =
+    wgpuCommandEncoderFinish(encoder->encoder, &cmd_desc);
   wgpuQueueSubmit(queue, 1, &command);
-  wgpuCommandEncoderRelease(encoder);
+  wgpuCommandEncoderRelease(encoder->encoder);
   wgpuCommandBufferRelease(command);
+  free(encoder);
 }

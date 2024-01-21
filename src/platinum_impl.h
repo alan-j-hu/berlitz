@@ -20,7 +20,14 @@ struct PlatContextImpl {
   WGPUSwapChain swapchain;
   WGPUBuffer uniform_buffer;
 
+  WGPUColor clear_color;
+
   struct PlatPipeline3d pipeline_3d;
+};
+
+struct PlatEncoderImpl {
+  WGPUCommandEncoder encoder;
+  WGPURenderPassEncoder render_pass;
 };
 
 #endif

@@ -37,7 +37,7 @@ void PlatPipeline3DInit(PlatContext ctx, struct PlatPipeline3d* pipeline)
   vert_buf_layouts[0] = (struct WGPUVertexBufferLayout){
     .attributeCount = 1,
     .attributes = vertex_attrs,
-    .arrayStride = sizeof(struct Vertex),
+    .arrayStride = sizeof(struct PlatVertex),
     .stepMode = WGPUVertexStepMode_Vertex
   };
 
