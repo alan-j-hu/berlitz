@@ -12,6 +12,12 @@ void debug_log(const char* message)
   std::cerr << message << std::flush;
 }
 
+void on_window_resize(GLFWwindow* window, int w, int h)
+{
+  PlatContext ctx = static_cast<PlatContext>(glfwGetWindowUserPointer(window));
+  PlatContextResize(ctx, w, h);
+}
+
 int main(int argc, char* argv[])
 {
   if (!glfwInit()) {
@@ -39,12 +45,17 @@ int main(int argc, char* argv[])
   WGPUSurface surface = wgpu::glfw::CreateSurfaceForWindow(instance, window)
     .MoveToCHandle();
   PlatContextParams params {};
+  params.width = 100;
+  params.height = 100;
   params.instance = instance;
   params.surface = surface;
   params.clear_color = (WGPUColor){
     .r = 1.0, .g = 1.0, .b = 0.0, .a = 1.0 };
   params.log = debug_log;
-  PlatContext ctx = PlatCreateContext(&params);
+  PlatContext ctx = PlatContextCreate(&params);
+
+  glfwSetWindowUserPointer(window, ctx);
+  glfwSetFramebufferSizeCallback(window, on_window_resize);
 
   PlatVertex vertices[4];
   vec3 v1 = {-0.5f, -0.5f, 0.5f};

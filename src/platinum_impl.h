@@ -9,6 +9,8 @@ struct PlatRenderTargetImpl {
 };
 
 struct PlatContextImpl {
+  int width;
+  int height;
   LogCallback log;
 
   WGPUInstance instance;

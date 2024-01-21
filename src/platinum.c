@@ -49,9 +49,24 @@ void deviceUncapturedErrorCallback(
   ctx->log(message);
 }
 
-PlatContext PlatCreateContext(PlatContextParams* params)
+WGPUSwapChain PlatCreateSwapchain(PlatContext ctx, int width, int height)
+{
+  WGPUSwapChainDescriptor desc = {0};
+  desc.nextInChain = NULL;
+  desc.width = width;
+  desc.height = height;
+  WGPUTextureFormat format = WGPUTextureFormat_BGRA8Unorm;
+  desc.format = format;
+  desc.usage = WGPUTextureUsage_RenderAttachment;
+  desc.presentMode = WGPUPresentMode_Fifo;
+  return wgpuDeviceCreateSwapChain(ctx->device, ctx->surface, &desc);
+}
+
+PlatContext PlatContextCreate(PlatContextParams* params)
 {
   PlatContext ctx = malloc(sizeof(struct PlatContextImpl));
+  ctx->width = params->width;
+  ctx->height = params->height;
   ctx->instance = params->instance;
   ctx->surface = params->surface;
   ctx->clear_color = params->clear_color;
@@ -87,17 +102,7 @@ PlatContext PlatCreateContext(PlatContextParams* params)
   }
 
   {
-    WGPUSwapChainDescriptor desc = {0};
-    desc.nextInChain = NULL;
-    desc.width = 100;
-    desc.height = 100;
-    WGPUTextureFormat format = WGPUTextureFormat_BGRA8Unorm;
-    desc.format = format;
-    desc.usage = WGPUTextureUsage_RenderAttachment;
-    desc.presentMode = WGPUPresentMode_Fifo;
-    WGPUSwapChain swapchain =
-      wgpuDeviceCreateSwapChain(ctx->device, ctx->surface, &desc);
-    ctx->swapchain = swapchain;
+    ctx->swapchain = PlatCreateSwapchain(ctx, ctx->width, ctx->height);
   }
 
   {
@@ -123,6 +128,14 @@ void PlatContextDestroy(PlatContext ctx)
   wgpuDeviceRelease(ctx->device);
   wgpuAdapterRelease(ctx->adapter);
   free(ctx);
+}
+
+void PlatContextResize(PlatContext ctx, int w, int h)
+{
+  wgpuSwapChainRelease(ctx->swapchain);
+  ctx->swapchain = PlatCreateSwapchain(ctx, w, h);
+  ctx->width = w;
+  ctx->height = h;
 }
 
 PlatRenderTarget PlatContextGetRenderTarget(PlatContext ctx)

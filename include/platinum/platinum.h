@@ -18,15 +18,18 @@ typedef struct PlatMeshBuilderImpl* PlatMeshBuilder;
 typedef void (*LogCallback)(const char* message);
 
 typedef struct PlatContextParams {
+  int width;
+  int height;
   WGPUInstance instance;
   WGPUSurface surface;
   WGPUColor clear_color;
   LogCallback log;
 } PlatContextParams;
 
-PlatContext PlatCreateContext(PlatContextParams*);
+PlatContext PlatContextCreate(PlatContextParams*);
 void PlatContextDestroy(PlatContext);
 void PlatContextPresent(PlatContext);
+void PlatContextResize(PlatContext, int w, int h);
 
 PlatRenderTarget PlatContextGetRenderTarget(PlatContext);
 void PlatRenderTargetDestroy(PlatRenderTarget);
