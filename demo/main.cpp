@@ -1,8 +1,10 @@
 #include "webgpu/webgpu.h"
 #include "platinum/platinum.h"
 #include <cstring>
+#include <filesystem>
 #include <iostream>
 #include <GLFW/glfw3.h>
+#include <SDL2/SDL.h>
 #include "dawn/dawn_proc.h"
 #include "dawn/native/DawnNative.h"
 #include "webgpu/webgpu_glfw.h"
@@ -23,9 +25,20 @@ int main(int argc, char* argv[])
   if (!glfwInit()) {
     return 1;
   }
+  if (SDL_Init(0) < 0) {
+    glfwTerminate();
+    return 1;
+  }
+
+  char* base_path = SDL_GetBasePath();
+  std::cerr << base_path << std::endl;
+  std::filesystem::path base = base_path;
+
   glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
   GLFWwindow* window = glfwCreateWindow(100, 100, "", NULL, NULL);
   if (!window) {
+    SDL_free(base_path);
+    SDL_Quit();
     glfwTerminate();
     return 1;
   }
@@ -37,6 +50,8 @@ int main(int argc, char* argv[])
   WGPUInstance instance = wgpuCreateInstance(&desc);
 
   if (!instance) {
+    SDL_free(base_path);
+    SDL_Quit();
     glfwDestroyWindow(window);
     glfwTerminate();
     return 1;
@@ -56,6 +71,8 @@ int main(int argc, char* argv[])
 
   glfwSetWindowUserPointer(window, ctx);
   glfwSetFramebufferSizeCallback(window, on_window_resize);
+
+  PlatTexture tex = PlatTextureLoad(ctx, (base / "res/cat.png").c_str());
 
   PlatVertex vertices[4];
   vec3 v1 = {-0.5f, -0.5f, 0.5f};
@@ -92,10 +109,14 @@ int main(int argc, char* argv[])
   }
 
   PlatMeshDestroy(mesh);
+
+  PlatTextureDestroy(tex);
   PlatContextDestroy(ctx);
 
   wgpuInstanceRelease(instance);
 
+  SDL_free(base_path);
+  SDL_Quit();
   glfwDestroyWindow(window);
   glfwTerminate();
   return 0;

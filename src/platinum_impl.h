@@ -32,4 +32,10 @@ struct PlatEncoderImpl {
   WGPURenderPassEncoder render_pass;
 };
 
+struct PlatTextureImpl {
+  WGPUTexture texture;
+  int w;
+  int h;
+};
+
 #endif

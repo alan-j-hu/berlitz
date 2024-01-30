@@ -14,6 +14,7 @@ typedef struct PlatRenderTargetImpl* PlatRenderTarget;
 typedef struct PlatEncoderImpl* PlatEncoder;
 typedef struct PlatMeshImpl* PlatMesh;
 typedef struct PlatMeshBuilderImpl* PlatMeshBuilder;
+typedef struct PlatTextureImpl* PlatTexture;
 
 typedef void (*LogCallback)(const char* message);
 
@@ -48,6 +49,10 @@ PlatMesh PlatMeshCreate(
   PlatVertex* vertices, size_t vertices_count,
   uint32_t* indices, size_t indices_count);
 void PlatMeshDestroy(PlatMesh);
+
+PlatTexture PlatTextureCreate(PlatContext, int w, int h);
+void PlatTextureDestroy(PlatTexture);
+PlatTexture PlatTextureLoad(PlatContext ctx, const char* filename);
 
 #ifdef __cplusplus
 }

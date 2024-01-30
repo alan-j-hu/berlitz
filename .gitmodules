@@ -4,3 +4,6 @@
 [submodule "third_party/cglm"]
 	path = third_party/cglm
 	url = https://github.com/recp/cglm
+[submodule "third_party/stb"]
+	path = third_party/stb
+	url = https://github.com/nothings/stb
