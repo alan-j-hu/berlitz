@@ -34,8 +34,7 @@ struct PlatEncoderImpl {
 
 struct PlatTextureImpl {
   WGPUTexture texture;
-  int w;
-  int h;
+  WGPUTextureView view;
 };
 
 #endif

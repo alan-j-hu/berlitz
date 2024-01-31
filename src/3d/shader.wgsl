@@ -1,3 +1,5 @@
+@group(0) @binding(0) var texture: texture_2d<f32>;
+
 struct Vertex {
   @location(0) pos: vec3f,
 }
@@ -15,5 +17,5 @@ fn vs_main(vertex: Vertex) -> Pipe {
 
 @fragment
 fn fs_main(pipe: Pipe) -> @location(0) vec4f {
-  return vec4f(1.0, 0.0, 1.0, 1.0);
+  return textureLoad(texture, vec2i(pipe.pos.xy), 0);
 }

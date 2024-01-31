@@ -44,16 +44,9 @@ void PlatPipeline3DInit(PlatContext ctx, struct PlatPipeline3d* pipeline)
   {
     WGPUBindGroupLayoutEntry entries[1] = {0};
     entries[0].binding = 0;
-    entries[0].visibility = WGPUShaderStage_Vertex;
-    entries[0].buffer.type = WGPUBufferBindingType_Uniform;
-    entries[0].buffer.minBindingSize = 0;
-
-    WGPUBindGroupEntry bindings[1] = {0};
-    bindings[0].nextInChain = NULL;
-    bindings[0].binding = 0;
-    bindings[0].buffer = ctx->uniform_buffer;
-    bindings[0].offset = 0;
-    bindings[0].size = 0;
+    entries[0].visibility = WGPUShaderStage_Fragment;
+    entries[0].texture.sampleType = WGPUTextureSampleType_Float;
+    entries[0].texture.viewDimension = WGPUTextureViewDimension_2D;
 
     WGPUBindGroupLayoutDescriptor layout_desc = {0};
     layout_desc.nextInChain = NULL;
@@ -67,8 +60,8 @@ void PlatPipeline3DInit(PlatContext ctx, struct PlatPipeline3d* pipeline)
     WGPUPipelineLayoutDescriptor desc = {
       .nextInChain = NULL,
       .label = "3d pipeline layout",
-      /*.bindGroupLayoutCount = 1,
-      .bindGroupLayouts = &pipeline->bind_group_layout*/
+      .bindGroupLayoutCount = 1,
+      .bindGroupLayouts = &pipeline->bind_group_layout
     };
 
     pipeline->pipeline_layout =

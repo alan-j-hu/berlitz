@@ -216,8 +216,27 @@ void PlatEncoderDestroy(PlatContext ctx, PlatEncoder encoder)
   free(encoder);
 }
 
-void PlatEncoderDrawMesh(PlatEncoder encoder, PlatMesh mesh)
+void PlatEncoderDrawMesh(
+  PlatContext ctx,
+  PlatEncoder encoder, PlatMesh mesh, PlatTexture plat_texture)
 {
+  WGPUBindGroupEntry bindings[1] = {0};
+  bindings[0].nextInChain = NULL;
+  bindings[0].binding = 0;
+  bindings[0].textureView = plat_texture->view;
+
+  WGPUBindGroupDescriptor bind_group_desc = {
+    .nextInChain = NULL,
+    .label = NULL,
+    .layout = ctx->pipeline_3d.bind_group_layout,
+    .entryCount = 1,
+    .entries = bindings,
+  };
+  WGPUBindGroup tex_bind_group =
+    wgpuDeviceCreateBindGroup(ctx->device, &bind_group_desc);
+  wgpuRenderPassEncoderSetBindGroup(
+    encoder->render_pass, 0, tex_bind_group, 0, NULL);
+
   wgpuRenderPassEncoderSetVertexBuffer(
     encoder->render_pass, 0,
     mesh->vertices, 0, mesh->vertices_count * sizeof(PlatVertex));
@@ -226,4 +245,5 @@ void PlatEncoderDrawMesh(PlatEncoder encoder, PlatMesh mesh)
     WGPUIndexFormat_Uint32, 0, mesh->indices_count * sizeof(uint32_t));
   wgpuRenderPassEncoderDrawIndexed(
     encoder->render_pass, mesh->indices_count, 1, 0, 0, 0);
+  wgpuBindGroupRelease(tex_bind_group);
 }

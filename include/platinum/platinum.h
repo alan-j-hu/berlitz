@@ -38,7 +38,7 @@ bool PlatRenderTargetOk(PlatRenderTarget);
 
 PlatEncoder PlatEncoderCreate(PlatContext, PlatRenderTarget);
 void PlatEncoderDestroy(PlatContext, PlatEncoder);
-void PlatEncoderDrawMesh(PlatEncoder, PlatMesh);
+void PlatEncoderDrawMesh(PlatContext, PlatEncoder, PlatMesh, PlatTexture);
 
 typedef struct PlatVertex {
   vec3 pos;

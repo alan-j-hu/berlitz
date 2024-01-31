@@ -5,6 +5,7 @@
 PlatTexture PlatTextureCreate(PlatContext ctx, int w, int h)
 {
   PlatTexture plat_texture = malloc(sizeof(struct PlatTextureImpl));
+  WGPUTextureFormat format = WGPUTextureFormat_RGBA8Unorm;
 
   WGPUTextureDescriptor desc = {
     .nextInChain = NULL,
@@ -15,7 +16,7 @@ PlatTexture PlatTextureCreate(PlatContext ctx, int w, int h)
       .height = h,
       .depthOrArrayLayers = 1
     },
-    .format = WGPUTextureFormat_RGBA8Unorm,
+    .format = format,
     .mipLevelCount = 1,
     .sampleCount = 1,
     .viewFormatCount = 0,
@@ -24,7 +25,22 @@ PlatTexture PlatTextureCreate(PlatContext ctx, int w, int h)
 
   WGPUTexture texture = wgpuDeviceCreateTexture(ctx->device, &desc);
 
+  WGPUTextureViewDescriptor view_desc = {
+    .nextInChain = NULL,
+    .label = NULL,
+    .format = format,
+    .dimension = WGPUTextureViewDimension_2D,
+    .baseMipLevel = 0,
+    .mipLevelCount = 1,
+    .baseArrayLayer = 0,
+    .arrayLayerCount = 1,
+    .aspect = WGPUTextureAspect_All
+  };
+
+  WGPUTextureView view = wgpuTextureCreateView(texture, &view_desc);
+
   plat_texture->texture = texture;
+  plat_texture->view = view;
 
   return plat_texture;
 }
@@ -74,6 +90,7 @@ PlatTexture PlatTextureLoad(PlatContext ctx, const char* filename)
 
 void PlatTextureDestroy(PlatTexture plat_texture)
 {
+  wgpuTextureViewRelease(plat_texture->view);
   wgpuTextureDestroy(plat_texture->texture);
   wgpuTextureRelease(plat_texture->texture);
   free(plat_texture);
