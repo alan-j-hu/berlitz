@@ -151,27 +151,10 @@ void PlatPipeline3DInit(PlatContext ctx, struct PlatPipeline3d* pipeline)
     wgpuDeviceCreateRenderPipeline(ctx->device, &desc);
 
   {
-    WGPUSamplerDescriptor desc = {
-      .addressModeU = WGPUAddressMode_ClampToEdge,
-      .addressModeV = WGPUAddressMode_ClampToEdge,
-      .addressModeW = WGPUAddressMode_ClampToEdge,
-      .magFilter = WGPUFilterMode_Linear,
-      .minFilter = WGPUFilterMode_Linear,
-      .mipmapFilter = WGPUMipmapFilterMode_Linear,
-      .lodMinClamp = 0.0f,
-      .lodMaxClamp = 1.0f,
-      .compare = WGPUCompareFunction_Undefined,
-      .maxAnisotropy = 1
-    };
-    WGPUSampler sampler = wgpuDeviceCreateSampler(ctx->device, &desc);
-    pipeline->sampler = sampler;
-  }
-
-  {
     WGPUBindGroupEntry bindings[1] = {0};
     bindings[0].nextInChain = NULL;
     bindings[0].binding = 0;
-    bindings[0].sampler = pipeline->sampler;
+    bindings[0].sampler = ctx->sampler;
 
     WGPUBindGroupDescriptor bind_group_desc = {
       .nextInChain = NULL,

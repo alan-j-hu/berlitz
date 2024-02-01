@@ -8,7 +8,6 @@ struct PlatPipeline3d {
   WGPUPipelineLayout pipeline_layout;
   WGPURenderPipeline render_pipeline;
 
-  WGPUSampler sampler;
   WGPUBindGroup sampler_bind_group;
 };
 

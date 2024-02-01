@@ -21,9 +21,8 @@ struct PlatContextImpl {
      caught up */
   WGPUSwapChain swapchain;
   WGPUBuffer uniform_buffer;
-
   WGPUColor clear_color;
-
+  WGPUSampler sampler;
   struct PlatPipeline3d pipeline_3d;
 };
 

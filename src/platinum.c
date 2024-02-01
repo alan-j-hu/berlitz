@@ -106,6 +106,23 @@ PlatContext PlatContextCreate(PlatContextParams* params)
   }
 
   {
+    WGPUSamplerDescriptor desc = {
+      .addressModeU = WGPUAddressMode_ClampToEdge,
+      .addressModeV = WGPUAddressMode_ClampToEdge,
+      .addressModeW = WGPUAddressMode_ClampToEdge,
+      .magFilter = WGPUFilterMode_Linear,
+      .minFilter = WGPUFilterMode_Linear,
+      .mipmapFilter = WGPUMipmapFilterMode_Linear,
+      .lodMinClamp = 0.0f,
+      .lodMaxClamp = 1.0f,
+      .compare = WGPUCompareFunction_Undefined,
+      .maxAnisotropy = 1
+    };
+    WGPUSampler sampler = wgpuDeviceCreateSampler(ctx->device, &desc);
+    ctx->sampler = sampler;
+  }
+
+  {
     WGPUBufferDescriptor desc = {0};
     desc.nextInChain = NULL;
     desc.size = sizeof(float);
@@ -123,7 +140,7 @@ PlatContext PlatContextCreate(PlatContextParams* params)
 void PlatContextDestroy(PlatContext ctx)
 {
   PlatPipeline3DDeinit(&ctx->pipeline_3d);
-
+  wgpuSamplerRelease(ctx->sampler);
   wgpuSwapChainRelease(ctx->swapchain);
   wgpuDeviceRelease(ctx->device);
   wgpuAdapterRelease(ctx->adapter);
