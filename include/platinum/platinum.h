@@ -42,6 +42,7 @@ void PlatEncoderDrawMesh(PlatContext, PlatEncoder, PlatMesh, PlatTexture);
 
 typedef struct PlatVertex {
   vec3 pos;
+  vec2 tex_coord;
 } PlatVertex;
 
 PlatMesh PlatMeshCreate(

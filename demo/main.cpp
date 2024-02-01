@@ -77,12 +77,23 @@ int main(int argc, char* argv[])
   PlatVertex vertices[4];
   vec3 v1 = {-0.5f, -0.5f, 0.5f};
   std::memcpy(vertices[0].pos, v1, sizeof(vec3));
+  vec2 t1 = {0.0, 1.0};
+  std::memcpy(vertices[0].tex_coord, t1, sizeof(vec2));
+
   vec3 v2 = {+0.5f, -0.5f, 0.5f};
   std::memcpy(vertices[1].pos, v2, sizeof(vec3));
+  vec2 t2 = {1.0, 1.0};
+  std::memcpy(vertices[1].tex_coord, t2, sizeof(vec2));
+
   vec3 v3 = {+0.5f, +0.5f, 0.5f};
   std::memcpy(vertices[2].pos, v3, sizeof(vec3));
+  vec2 t3 = {1.0, 0.0};
+  std::memcpy(vertices[2].tex_coord, t3, sizeof(vec2));
+
   vec3 v4 = {-0.5f, +0.5f, 0.5f};
   std::memcpy(vertices[3].pos, v4, sizeof(vec3));
+  vec2 t4 = {0.0, 0.0};
+  std::memcpy(vertices[3].tex_coord, t4, sizeof(vec2));
 
   uint32_t indices[] = {
     0, 1, 2,

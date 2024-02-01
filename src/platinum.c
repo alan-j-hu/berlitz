@@ -196,6 +196,10 @@ PlatEncoder PlatEncoderCreate(PlatContext ctx, PlatRenderTarget target)
   wgpuRenderPassEncoderSetPipeline(
     render_pass, ctx->pipeline_3d.render_pipeline);
   plat_encoder->render_pass = render_pass;
+
+  wgpuRenderPassEncoderSetBindGroup(
+    render_pass, 0, ctx->pipeline_3d.sampler_bind_group, 0, NULL);
+
   return plat_encoder;
 }
 
@@ -228,14 +232,14 @@ void PlatEncoderDrawMesh(
   WGPUBindGroupDescriptor bind_group_desc = {
     .nextInChain = NULL,
     .label = NULL,
-    .layout = ctx->pipeline_3d.bind_group_layout,
+    .layout = ctx->pipeline_3d.texture_bind_group_layout,
     .entryCount = 1,
     .entries = bindings,
   };
   WGPUBindGroup tex_bind_group =
     wgpuDeviceCreateBindGroup(ctx->device, &bind_group_desc);
   wgpuRenderPassEncoderSetBindGroup(
-    encoder->render_pass, 0, tex_bind_group, 0, NULL);
+    encoder->render_pass, 1, tex_bind_group, 0, NULL);
 
   wgpuRenderPassEncoderSetVertexBuffer(
     encoder->render_pass, 0,

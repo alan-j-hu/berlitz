@@ -1,3 +1,4 @@
+#include <stddef.h>
 #include <stdlib.h>
 #include "cglm/vec3.h"
 #include "platinum/platinum.h"
@@ -26,20 +27,39 @@ void PlatPipeline3DInit(PlatContext ctx, struct PlatPipeline3d* pipeline)
   pipeline->shader_module =
     wgpuDeviceCreateShaderModule(ctx->device, &shader_desc);
 
-  WGPUVertexAttribute vertex_attrs[1] = {0};
+  WGPUVertexAttribute vertex_attrs[2];
   vertex_attrs[0] = (struct WGPUVertexAttribute){
     .shaderLocation = 0,
     .format = WGPUVertexFormat_Float32x3,
-    .offset = 0
+    .offset = offsetof(PlatVertex, pos)
+  };
+  vertex_attrs[1] = (struct WGPUVertexAttribute){
+    .shaderLocation = 1,
+    .format = WGPUVertexFormat_Float32x2,
+    .offset = offsetof(PlatVertex, tex_coord)
   };
 
   WGPUVertexBufferLayout vert_buf_layouts[1] = {0};
   vert_buf_layouts[0] = (struct WGPUVertexBufferLayout){
-    .attributeCount = 1,
+    .attributeCount = 2,
     .attributes = vertex_attrs,
-    .arrayStride = sizeof(struct PlatVertex),
+    .arrayStride = sizeof(PlatVertex),
     .stepMode = WGPUVertexStepMode_Vertex
   };
+
+  {
+    WGPUBindGroupLayoutEntry entries[1] = {0};
+    entries[0].binding = 0;
+    entries[0].visibility = WGPUShaderStage_Fragment;
+    entries[0].sampler.type = WGPUSamplerBindingType_Filtering;
+
+    WGPUBindGroupLayoutDescriptor layout_desc = {0};
+    layout_desc.nextInChain = NULL;
+    layout_desc.entryCount = 1;
+    layout_desc.entries = entries;
+    pipeline->sampler_bind_group_layout =
+      wgpuDeviceCreateBindGroupLayout(ctx->device, &layout_desc);
+  }
 
   {
     WGPUBindGroupLayoutEntry entries[1] = {0};
@@ -52,16 +72,21 @@ void PlatPipeline3DInit(PlatContext ctx, struct PlatPipeline3d* pipeline)
     layout_desc.nextInChain = NULL;
     layout_desc.entryCount = 1;
     layout_desc.entries = entries;
-    pipeline->bind_group_layout =
+    pipeline->texture_bind_group_layout =
       wgpuDeviceCreateBindGroupLayout(ctx->device, &layout_desc);
   }
+
+  WGPUBindGroupLayout layouts[] = {
+    pipeline->sampler_bind_group_layout,
+    pipeline->texture_bind_group_layout
+  };
 
   {
     WGPUPipelineLayoutDescriptor desc = {
       .nextInChain = NULL,
       .label = "3d pipeline layout",
-      .bindGroupLayoutCount = 1,
-      .bindGroupLayouts = &pipeline->bind_group_layout
+      .bindGroupLayoutCount = 2,
+      .bindGroupLayouts = layouts
     };
 
     pipeline->pipeline_layout =
@@ -124,12 +149,49 @@ void PlatPipeline3DInit(PlatContext ctx, struct PlatPipeline3d* pipeline)
 
   pipeline->render_pipeline =
     wgpuDeviceCreateRenderPipeline(ctx->device, &desc);
+
+  {
+    WGPUSamplerDescriptor desc = {
+      .addressModeU = WGPUAddressMode_ClampToEdge,
+      .addressModeV = WGPUAddressMode_ClampToEdge,
+      .addressModeW = WGPUAddressMode_ClampToEdge,
+      .magFilter = WGPUFilterMode_Linear,
+      .minFilter = WGPUFilterMode_Linear,
+      .mipmapFilter = WGPUMipmapFilterMode_Linear,
+      .lodMinClamp = 0.0f,
+      .lodMaxClamp = 1.0f,
+      .compare = WGPUCompareFunction_Undefined,
+      .maxAnisotropy = 1
+    };
+    WGPUSampler sampler = wgpuDeviceCreateSampler(ctx->device, &desc);
+    pipeline->sampler = sampler;
+  }
+
+  {
+    WGPUBindGroupEntry bindings[1] = {0};
+    bindings[0].nextInChain = NULL;
+    bindings[0].binding = 0;
+    bindings[0].sampler = pipeline->sampler;
+
+    WGPUBindGroupDescriptor bind_group_desc = {
+      .nextInChain = NULL,
+      .label = NULL,
+      .layout = pipeline->sampler_bind_group_layout,
+      .entryCount = 1,
+      .entries = bindings,
+    };
+    WGPUBindGroup sampler_bind_group =
+      wgpuDeviceCreateBindGroup(ctx->device, &bind_group_desc);
+    pipeline->sampler_bind_group = sampler_bind_group;
+  }
 }
 
 void PlatPipeline3DDeinit(struct PlatPipeline3d* pipeline)
 {
+  wgpuBindGroupRelease(pipeline->sampler_bind_group);
   wgpuRenderPipelineRelease(pipeline->render_pipeline);
   wgpuPipelineLayoutRelease(pipeline->pipeline_layout);
-  wgpuBindGroupLayoutRelease(pipeline->bind_group_layout);
+  wgpuBindGroupLayoutRelease(pipeline->texture_bind_group_layout);
+  wgpuBindGroupLayoutRelease(pipeline->sampler_bind_group_layout);
   wgpuShaderModuleRelease(pipeline->shader_module);
 }
