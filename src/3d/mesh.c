@@ -5,7 +5,7 @@
 
 PlatMesh PlatMeshCreate(
   PlatContext ctx,
-  PlatVertex* vertices, size_t vc,
+  PlatVertex3d* vertices, size_t vc,
   uint32_t* indices, size_t ic)
 {
   PlatMesh mesh = malloc(sizeof(struct PlatMeshImpl));
@@ -15,7 +15,7 @@ PlatMesh PlatMeshCreate(
     .nextInChain = NULL,
     .label = "",
     .usage = WGPUBufferUsage_CopyDst | WGPUBufferUsage_Vertex,
-    .size = vc * sizeof(PlatVertex),
+    .size = vc * sizeof(PlatVertex3d),
     .mappedAtCreation = false
   };
   WGPUBuffer vbuf = wgpuDeviceCreateBuffer(ctx->device, &vdesc);

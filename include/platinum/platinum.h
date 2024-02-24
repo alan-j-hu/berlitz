@@ -40,14 +40,14 @@ PlatEncoder PlatEncoderCreate(PlatContext, PlatRenderTarget);
 void PlatEncoderDestroy(PlatContext, PlatEncoder);
 void PlatEncoderDrawMesh(PlatContext, PlatEncoder, PlatMesh, PlatTexture);
 
-typedef struct PlatVertex {
+typedef struct PlatVertex3d {
   vec3 pos;
   vec2 tex_coord;
-} PlatVertex;
+} PlatVertex3d;
 
 PlatMesh PlatMeshCreate(
   PlatContext ctx,
-  PlatVertex* vertices, size_t vertices_count,
+  PlatVertex3d* vertices, size_t vertices_count,
   uint32_t* indices, size_t indices_count);
 void PlatMeshDestroy(PlatMesh);
 

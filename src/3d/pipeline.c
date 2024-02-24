@@ -31,19 +31,19 @@ void PlatPipeline3DInit(PlatContext ctx, struct PlatPipeline3d* pipeline)
   vertex_attrs[0] = (struct WGPUVertexAttribute){
     .shaderLocation = 0,
     .format = WGPUVertexFormat_Float32x3,
-    .offset = offsetof(PlatVertex, pos)
+    .offset = offsetof(PlatVertex3d, pos)
   };
   vertex_attrs[1] = (struct WGPUVertexAttribute){
     .shaderLocation = 1,
     .format = WGPUVertexFormat_Float32x2,
-    .offset = offsetof(PlatVertex, tex_coord)
+    .offset = offsetof(PlatVertex3d, tex_coord)
   };
 
   WGPUVertexBufferLayout vert_buf_layouts[1] = {0};
   vert_buf_layouts[0] = (struct WGPUVertexBufferLayout){
     .attributeCount = 2,
     .attributes = vertex_attrs,
-    .arrayStride = sizeof(PlatVertex),
+    .arrayStride = sizeof(PlatVertex3d),
     .stepMode = WGPUVertexStepMode_Vertex
   };
 

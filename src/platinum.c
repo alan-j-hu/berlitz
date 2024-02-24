@@ -260,7 +260,7 @@ void PlatEncoderDrawMesh(
 
   wgpuRenderPassEncoderSetVertexBuffer(
     encoder->render_pass, 0,
-    mesh->vertices, 0, mesh->vertices_count * sizeof(PlatVertex));
+    mesh->vertices, 0, mesh->vertices_count * sizeof(PlatVertex3d));
   wgpuRenderPassEncoderSetIndexBuffer(
     encoder->render_pass, mesh->indices,
     WGPUIndexFormat_Uint32, 0, mesh->indices_count * sizeof(uint32_t));

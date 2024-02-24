@@ -74,7 +74,7 @@ int main(int argc, char* argv[])
 
   PlatTexture tex = PlatTextureLoad(ctx, (base / "res/cat.png").c_str());
 
-  PlatVertex vertices[4];
+  PlatVertex3d vertices[4];
   vec3 v1 = {-0.5f, -0.5f, 0.5f};
   std::memcpy(vertices[0].pos, v1, sizeof(vec3));
   vec2 t1 = {0.0, 1.0};
