@@ -36,8 +36,10 @@ PlatRenderTarget PlatContextGetRenderTarget(PlatContext);
 void PlatRenderTargetDestroy(PlatRenderTarget);
 bool PlatRenderTargetOk(PlatRenderTarget);
 
-PlatEncoder PlatEncoderCreate(PlatContext, PlatRenderTarget);
-void PlatEncoderDestroy(PlatContext, PlatEncoder);
+PlatEncoder PlatEncoderCreate();
+void PlatEncoderDestroy(PlatEncoder);
+void PlatEncoderBegin(PlatContext, PlatEncoder, PlatRenderTarget);
+void PlatEncoderEnd(PlatContext, PlatEncoder);
 void PlatEncoderDrawMesh(PlatContext, PlatEncoder, PlatMesh, PlatTexture);
 
 typedef struct PlatVertex3d {

@@ -101,24 +101,28 @@ int main(int argc, char* argv[])
   };
 
   PlatMesh mesh = PlatMeshCreate(ctx, vertices, 4, indices, 6);
+  PlatEncoder encoder = PlatEncoderCreate();
 
   while(!glfwWindowShouldClose(window)) {
     glfwPollEvents();
     PlatRenderTarget target = PlatContextGetRenderTarget(ctx);
     if (!PlatRenderTargetOk(target)) {
+      PlatEncoderDestroy(encoder);
       PlatMeshDestroy(mesh);
       PlatContextDestroy(ctx);
       wgpuInstanceRelease(instance);
       glfwDestroyWindow(window);
       glfwTerminate();
     }
-    PlatEncoder encoder = PlatEncoderCreate(ctx, target);
+
+    PlatEncoderBegin(ctx, encoder, target);
     PlatEncoderDrawMesh(ctx, encoder, mesh, tex);
-    PlatEncoderDestroy(ctx, encoder);
+    PlatEncoderEnd(ctx, encoder);
     PlatRenderTargetDestroy(target);
     PlatContextPresent(ctx);
   }
 
+  PlatEncoderDestroy(encoder);
   PlatMeshDestroy(mesh);
 
   PlatTextureDestroy(tex);

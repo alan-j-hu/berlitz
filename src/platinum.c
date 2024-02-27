@@ -180,11 +180,9 @@ bool PlatRenderTargetOk(PlatRenderTarget target)
   return !!target->view;
 }
 
-PlatEncoder PlatEncoderCreate(PlatContext ctx, PlatRenderTarget target)
+void PlatEncoderBegin(
+  PlatContext ctx, PlatEncoder plat_encoder, PlatRenderTarget target)
 {
-  /* TODO: This is allocated in loop, see if I can cache or pool it */
-  PlatEncoder plat_encoder = malloc(sizeof(struct PlatEncoderImpl));
-
   WGPUCommandEncoderDescriptor enc_desc = {0};
   enc_desc.nextInChain = NULL;
   enc_desc.label = "Encoder";
@@ -216,11 +214,15 @@ PlatEncoder PlatEncoderCreate(PlatContext ctx, PlatRenderTarget target)
 
   wgpuRenderPassEncoderSetBindGroup(
     render_pass, 0, ctx->pipeline_3d.sampler_bind_group, 0, NULL);
+}
 
+PlatEncoder PlatEncoderCreate()
+{
+  PlatEncoder plat_encoder = malloc(sizeof(struct PlatEncoderImpl));
   return plat_encoder;
 }
 
-void PlatEncoderDestroy(PlatContext ctx, PlatEncoder encoder)
+void PlatEncoderEnd(PlatContext ctx, PlatEncoder encoder)
 {
   wgpuRenderPassEncoderEnd(encoder->render_pass);
   wgpuRenderPassEncoderRelease(encoder->render_pass);
@@ -234,6 +236,10 @@ void PlatEncoderDestroy(PlatContext ctx, PlatEncoder encoder)
   wgpuQueueSubmit(queue, 1, &command);
   wgpuCommandEncoderRelease(encoder->encoder);
   wgpuCommandBufferRelease(command);
+}
+
+void PlatEncoderDestroy(PlatEncoder encoder)
+{
   free(encoder);
 }
 
