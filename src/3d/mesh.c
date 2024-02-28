@@ -1,4 +1,4 @@
-#include "platinum/platinum.h"
+#include "platinum/3d/mesh.h"
 #include "../platinum_impl.h"
 #include "3d_impl.h"
 #include <memory.h>

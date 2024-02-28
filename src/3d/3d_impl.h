@@ -21,7 +21,9 @@ struct PlatMeshImpl {
   WGPUBuffer indices;
 };
 
-struct PlatMeshBuilderImpl {
+struct PlatCameraImpl {
+  vec3 pos;
+  vec3 target;
 };
 
 #endif

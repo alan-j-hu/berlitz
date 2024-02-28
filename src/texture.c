@@ -1,4 +1,4 @@
-#include "platinum/platinum.h"
+#include "platinum/texture.h"
 #include "platinum_impl.h"
 #include "stb_image.h"
 
