@@ -27,6 +27,7 @@ add_library(platinum
   src/platinum.c
   src/stb_image.c
   src/texture.c
+  src/3d/camera.c
   src/3d/mesh.c
   src/3d/pipeline.c)
 add_dependencies(platinum generate_shaders)

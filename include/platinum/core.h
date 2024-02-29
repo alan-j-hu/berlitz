@@ -15,6 +15,7 @@ typedef struct PlatEncoderImpl* PlatEncoder;
 typedef struct PlatMeshImpl* PlatMesh;
 typedef struct PlatMeshBuilderImpl* PlatMeshBuilder;
 typedef struct PlatTextureImpl* PlatTexture;
+typedef struct PlatCamera3dImpl* PlatCamera3d;
 
 typedef void (*LogCallback)(const char* message);
 

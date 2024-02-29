@@ -3,6 +3,7 @@
 
 #include "core.h"
 #include "texture.h"
+#include "3d/camera.h"
 #include "3d/mesh.h"
 
 #endif
