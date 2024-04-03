@@ -22,6 +22,11 @@ void on_window_resize(GLFWwindow* window, int w, int h)
 
 int main(int argc, char* argv[])
 {
+  mat4 viewproj;
+  glm_mat4_identity(viewproj);
+  viewproj[0][0] = 2.0;
+  viewproj[1][1] = 0.5;
+
   if (!glfwInit()) {
     return 1;
   }
@@ -101,7 +106,7 @@ int main(int argc, char* argv[])
   };
 
   PlatMesh mesh = PlatMeshCreate(ctx, vertices, 4, indices, 6);
-  PlatEncoder encoder = PlatEncoderCreate();
+  PlatEncoder encoder = PlatEncoderCreate(ctx);
 
   while(!glfwWindowShouldClose(window)) {
     glfwPollEvents();
@@ -115,7 +120,7 @@ int main(int argc, char* argv[])
       glfwTerminate();
     }
 
-    PlatEncoderBegin(ctx, encoder, target);
+    PlatEncoderBegin(ctx, encoder, viewproj, target);
     PlatEncoderDrawMesh(ctx, encoder, mesh, tex);
     PlatEncoderEnd(ctx, encoder);
     PlatRenderTargetDestroy(target);

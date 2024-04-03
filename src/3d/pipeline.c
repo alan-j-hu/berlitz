@@ -1,6 +1,6 @@
 #include <stddef.h>
 #include <stdlib.h>
-#include "cglm/vec3.h"
+#include "cglm/mat4.h"
 #include "platinum/platinum.h"
 #include "../platinum_impl.h"
 #include "3d_impl.h"
@@ -64,6 +64,21 @@ void PlatPipeline3DInit(PlatContext ctx, struct PlatPipeline3d* pipeline)
   {
     WGPUBindGroupLayoutEntry entries[1] = {0};
     entries[0].binding = 0;
+    entries[0].visibility = WGPUShaderStage_Vertex;
+    entries[0].buffer.type = WGPUBufferBindingType_Uniform;
+    entries[0].buffer.minBindingSize = sizeof(mat4);
+
+    WGPUBindGroupLayoutDescriptor layout_desc = {0};
+    layout_desc.nextInChain = NULL;
+    layout_desc.entryCount = 1;
+    layout_desc.entries = entries;
+    pipeline->camera_bind_group_layout =
+      wgpuDeviceCreateBindGroupLayout(ctx->device, &layout_desc);
+  }
+
+  {
+    WGPUBindGroupLayoutEntry entries[1] = {0};
+    entries[0].binding = 0;
     entries[0].visibility = WGPUShaderStage_Fragment;
     entries[0].texture.sampleType = WGPUTextureSampleType_Float;
     entries[0].texture.viewDimension = WGPUTextureViewDimension_2D;
@@ -78,6 +93,7 @@ void PlatPipeline3DInit(PlatContext ctx, struct PlatPipeline3d* pipeline)
 
   WGPUBindGroupLayout layouts[] = {
     pipeline->sampler_bind_group_layout,
+    pipeline->camera_bind_group_layout,
     pipeline->texture_bind_group_layout
   };
 
@@ -85,7 +101,7 @@ void PlatPipeline3DInit(PlatContext ctx, struct PlatPipeline3d* pipeline)
     WGPUPipelineLayoutDescriptor desc = {
       .nextInChain = NULL,
       .label = "3d pipeline layout",
-      .bindGroupLayoutCount = 2,
+      .bindGroupLayoutCount = 3,
       .bindGroupLayouts = layouts
     };
 
@@ -175,6 +191,7 @@ void PlatPipeline3DDeinit(struct PlatPipeline3d* pipeline)
   wgpuRenderPipelineRelease(pipeline->render_pipeline);
   wgpuPipelineLayoutRelease(pipeline->pipeline_layout);
   wgpuBindGroupLayoutRelease(pipeline->texture_bind_group_layout);
+  wgpuBindGroupLayoutRelease(pipeline->camera_bind_group_layout);
   wgpuBindGroupLayoutRelease(pipeline->sampler_bind_group_layout);
   wgpuShaderModuleRelease(pipeline->shader_module);
 }

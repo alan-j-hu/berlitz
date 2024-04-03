@@ -1,5 +1,6 @@
 @group(0) @binding(0) var tex_sampler: sampler;
-@group(1) @binding(0) var texture: texture_2d<f32>;
+@group(1) @binding(0) var<uniform> camera: mat4x4f;
+@group(2) @binding(0) var texture: texture_2d<f32>;
 
 struct Vertex {
   @location(0) pos: vec3f,
@@ -14,7 +15,7 @@ struct Pipe {
 @vertex
 fn vs_main(vertex: Vertex) -> Pipe {
   var out: Pipe;
-  out.pos = vec4f(vertex.pos, 1.0);
+  out.pos = camera * vec4f(vertex.pos, 1.0);
   out.tex_coord = vertex.tex_coord;
   return out;
 }

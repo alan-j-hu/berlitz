@@ -6,6 +6,7 @@ extern "C" {
 #endif
 
 #include <stdbool.h>
+#include "cglm/mat4.h"
 #include "cglm/vec3.h"
 #include "webgpu/webgpu.h"
 
@@ -37,9 +38,9 @@ PlatRenderTarget PlatContextGetRenderTarget(PlatContext);
 void PlatRenderTargetDestroy(PlatRenderTarget);
 bool PlatRenderTargetOk(PlatRenderTarget);
 
-PlatEncoder PlatEncoderCreate();
+PlatEncoder PlatEncoderCreate(PlatContext);
 void PlatEncoderDestroy(PlatEncoder);
-void PlatEncoderBegin(PlatContext, PlatEncoder, PlatRenderTarget);
+void PlatEncoderBegin(PlatContext, PlatEncoder, mat4, PlatRenderTarget);
 void PlatEncoderEnd(PlatContext, PlatEncoder);
 void PlatEncoderDrawMesh(PlatContext, PlatEncoder, PlatMesh, PlatTexture);
 

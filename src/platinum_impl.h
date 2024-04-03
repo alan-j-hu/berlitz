@@ -29,6 +29,9 @@ struct PlatContextImpl {
 struct PlatEncoderImpl {
   WGPUCommandEncoder encoder;
   WGPURenderPassEncoder render_pass;
+
+  WGPUBindGroup camera_bind_group;
+  WGPUBuffer camera_buffer;
 };
 
 struct PlatTextureImpl {
