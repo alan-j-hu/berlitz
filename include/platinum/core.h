@@ -40,7 +40,7 @@ bool PlatRenderTargetOk(PlatRenderTarget);
 
 PlatEncoder PlatEncoderCreate(PlatContext);
 void PlatEncoderDestroy(PlatEncoder);
-void PlatEncoderBegin(PlatContext, PlatEncoder, mat4, PlatRenderTarget);
+void PlatEncoderBegin(PlatContext, PlatEncoder, const mat4, PlatRenderTarget);
 void PlatEncoderEnd(PlatContext, PlatEncoder);
 void PlatEncoderDrawMesh(PlatContext, PlatEncoder, PlatMesh, PlatTexture);
 

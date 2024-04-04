@@ -214,7 +214,7 @@ PlatEncoder PlatEncoderCreate(PlatContext ctx)
 void PlatEncoderBegin(
   PlatContext ctx,
   PlatEncoder plat_encoder,
-  mat4 viewproj,
+  const mat4 viewproj,
   PlatRenderTarget target)
 {
   WGPUCommandEncoderDescriptor enc_desc = {0};
