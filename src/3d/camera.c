@@ -16,8 +16,8 @@ struct PlatCamera3dImpl
   float near_clip;
   float far_clip;
 
-  bool view_dirty;
-  bool proj_dirty;
+  _Bool view_dirty : 1;
+  _Bool proj_dirty : 1;
 };
 
 PlatCamera3d PlatCamera3dCreate(PlatCamera3dParams* params)
@@ -39,8 +39,8 @@ PlatCamera3d PlatCamera3dCreate(PlatCamera3dParams* params)
   camera->near_clip = params->near_clip;
   camera->far_clip = params->far_clip;
 
-  camera->view_dirty = true;
-  camera->proj_dirty = true;
+  camera->view_dirty = 1;
+  camera->proj_dirty = 1;
 
   return camera;
 }
@@ -50,17 +50,19 @@ void PlatCamera3dDestroy(PlatCamera3d camera)
   free(camera);
 }
 
-void PlatCamera3dSetVec3(vec3 update, vec3 dest, bool* dirty_flag)
+/* Returns 0 if the vec dest was left unchanged, returns 1 otherwise. */
+_Bool PlatCamera3dSetVec3(vec3 update, vec3 dest)
 {
   const float x = update[0];
   const float y = update[1];
   const float z = update[2];
-  if (dest[0] != x || dest[1] != y || dest[2] != z) {
-    *dirty_flag = true;
+  if (dest[0] == x && dest[1] == y && dest[2] == z) {
+    return 0;
   }
   dest[0] = x;
   dest[1] = y;
   dest[2] = z;
+  return 1;
 }
 
 const vec3* PlatCamera3dPos(PlatCamera3d camera)
@@ -70,7 +72,7 @@ const vec3* PlatCamera3dPos(PlatCamera3d camera)
 
 void PlatCamera3dSetPos(PlatCamera3d camera, vec3 pos)
 {
-  PlatCamera3dSetVec3(pos, camera->position, &camera->view_dirty);
+  camera->view_dirty |= PlatCamera3dSetVec3(pos, camera->position);
 }
 
 const vec3* PlatCamera3dTarget(PlatCamera3d camera)
@@ -80,14 +82,14 @@ const vec3* PlatCamera3dTarget(PlatCamera3d camera)
 
 void PlatCamera3dSetTarget(PlatCamera3d camera, vec3 target)
 {
-  PlatCamera3dSetVec3(target, camera->target, &camera->view_dirty);
+  camera->view_dirty |= PlatCamera3dSetVec3(target, camera->target);
 }
 
 const mat4* PlatCamera3dView(PlatCamera3d camera)
 {
   if (camera->view_dirty) {
     glm_lookat(camera->position, camera->target, camera->up, camera->view);
-    camera->view_dirty = false;
+    camera->view_dirty = 0;
   }
   return &camera->view;
 }
@@ -101,7 +103,7 @@ const mat4* PlatCamera3dProj(PlatCamera3d camera)
       camera->near_clip,
       camera->far_clip,
       camera->proj);
-    camera->proj_dirty = false;
+    camera->proj_dirty = 0;
   }
   return &camera->proj;
 }
