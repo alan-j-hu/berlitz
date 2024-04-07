@@ -131,6 +131,7 @@ int main(int argc, char* argv[])
   };
 
   PlatMesh mesh = PlatMeshCreate(ctx, vertices, 4, indices, 6);
+  PlatObjectData obj = PlatObjectDataCreate(ctx);
   PlatEncoder encoder = PlatEncoderCreate(ctx);
 
   while(!glfwWindowShouldClose(window)) {
@@ -138,6 +139,7 @@ int main(int argc, char* argv[])
     PlatRenderTarget target = PlatContextGetRenderTarget(ctx);
     if (!PlatRenderTargetOk(target)) {
       PlatEncoderDestroy(encoder);
+      PlatObjectDataDestroy(obj);
       PlatMeshDestroy(mesh);
       PlatMaterialDestroy(material);
       PlatTextureDestroy(tex);
@@ -151,13 +153,14 @@ int main(int argc, char* argv[])
 
     PlatEncoderBegin(ctx, encoder, *PlatCamera3dViewProj(camera), target);
     PlatEncoderSetMaterial(encoder, material);
-    PlatEncoderDrawMesh(ctx, encoder, mesh);
+    PlatEncoderDrawMesh(ctx, encoder, obj, mesh);
     PlatEncoderEnd(ctx, encoder);
     PlatRenderTargetDestroy(target);
     PlatContextPresent(ctx);
   }
 
   PlatEncoderDestroy(encoder);
+  PlatObjectDataDestroy(obj);
   PlatMeshDestroy(mesh);
 
   PlatMaterialDestroy(material);

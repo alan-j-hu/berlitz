@@ -47,4 +47,10 @@ struct PlatMaterialImpl {
   WGPUBindGroup bind_group;
 };
 
+struct PlatObjectDataImpl {
+  mat4 transform_matrix;
+  WGPUBindGroup bind_group;
+  WGPUBuffer transform_buffer;
+};
+
 #endif

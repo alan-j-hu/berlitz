@@ -210,6 +210,47 @@ void PlatMaterialDestroy(PlatMaterial material)
   free(material);
 }
 
+PlatObjectData PlatObjectDataCreate(PlatContext ctx)
+{
+  PlatObjectData data = malloc(sizeof(struct PlatObjectDataImpl));
+
+  WGPUBufferDescriptor buffer_desc = {0};
+  buffer_desc.size = sizeof(mat4);
+  buffer_desc.usage = WGPUBufferUsage_CopyDst | WGPUBufferUsage_Uniform;
+  buffer_desc.mappedAtCreation = 0;
+  WGPUBuffer buffer = wgpuDeviceCreateBuffer(ctx->device, &buffer_desc);
+
+  WGPUBindGroupEntry entries[1] = {0, 0};
+  entries[0].nextInChain = NULL;
+  entries[0].binding = 0;
+  entries[0].buffer = buffer;
+  entries[0].offset = 0;
+  entries[0].size = sizeof(mat4);
+
+  WGPUBindGroupDescriptor bind_group_desc = {
+    .nextInChain = NULL,
+    .label = NULL,
+    .layout = ctx->pipeline_3d.object_bind_group_layout,
+    .entryCount = 1,
+    .entries = entries,
+  };
+  WGPUBindGroup bind_group =
+    wgpuDeviceCreateBindGroup(ctx->device, &bind_group_desc);
+
+  data->bind_group = bind_group;
+  data->transform_buffer = buffer;
+
+  return data;
+}
+
+void PlatObjectDataDestroy(PlatObjectData data)
+{
+  wgpuBufferDestroy(data->transform_buffer);
+  wgpuBufferRelease(data->transform_buffer);
+  wgpuBindGroupRelease(data->bind_group);
+  free(data);
+}
+
 PlatEncoder PlatEncoderCreate(PlatContext ctx)
 {
   PlatEncoder plat_encoder = malloc(sizeof(struct PlatEncoderImpl));
@@ -322,8 +363,24 @@ void PlatEncoderSetMaterial(PlatEncoder encoder, PlatMaterial material)
     encoder->render_pass, MATERIAL_BIND_GROUP, material->bind_group, 0, NULL);
 }
 
-void PlatEncoderDrawMesh(PlatContext ctx, PlatEncoder encoder, PlatMesh mesh)
+void PlatEncoderDrawMesh(
+  PlatContext ctx,
+  PlatEncoder encoder,
+  PlatObjectData data,
+  PlatMesh mesh)
 {
+  wgpuRenderPassEncoderSetBindGroup(
+    encoder->render_pass,
+    OBJECT_BIND_GROUP,
+    data->bind_group,
+    0,
+    NULL);
+
+  glm_mat4_identity(data->transform_matrix);
+  WGPUQueue queue = wgpuDeviceGetQueue(ctx->device);
+  wgpuQueueWriteBuffer(
+    queue, data->transform_buffer, 0, data->transform_matrix, sizeof(mat4));
+
   wgpuRenderPassEncoderSetVertexBuffer(
     encoder->render_pass, 0,
     mesh->vertices, 0, mesh->vertices_count * sizeof(PlatVertex3d));

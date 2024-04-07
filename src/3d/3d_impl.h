@@ -7,6 +7,7 @@ struct PlatPipeline3d {
   WGPUShaderModule shader_module;
   WGPUBindGroupLayout global_bind_group_layout;
   WGPUBindGroupLayout material_bind_group_layout;
+  WGPUBindGroupLayout object_bind_group_layout;
   WGPUPipelineLayout pipeline_layout;
   WGPURenderPipeline render_pipeline;
 };
