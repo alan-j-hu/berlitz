@@ -180,6 +180,36 @@ bool PlatRenderTargetOk(PlatRenderTarget target)
   return !!target->view;
 }
 
+PlatMaterial PlatMaterialCreate(PlatContext ctx, PlatTexture plat_texture)
+{
+  PlatMaterial material = malloc(sizeof(struct PlatMaterialImpl));
+
+  WGPUBindGroupEntry bindings[1] = {0};
+  bindings[0].nextInChain = NULL;
+  bindings[0].binding = 0;
+  bindings[0].textureView = plat_texture->view;
+
+  WGPUBindGroupDescriptor bind_group_desc = {
+    .nextInChain = NULL,
+    .label = NULL,
+    .layout = ctx->pipeline_3d.texture_bind_group_layout,
+    .entryCount = 1,
+    .entries = bindings,
+  };
+  WGPUBindGroup bind_group =
+    wgpuDeviceCreateBindGroup(ctx->device, &bind_group_desc);
+
+  material->bind_group = bind_group;
+
+  return material;
+}
+
+void PlatMaterialDestroy(PlatMaterial material)
+{
+  wgpuBindGroupRelease(material->bind_group);
+  free(material);
+}
+
 PlatEncoder PlatEncoderCreate(PlatContext ctx)
 {
   PlatEncoder plat_encoder = malloc(sizeof(struct PlatEncoderImpl));
@@ -281,27 +311,14 @@ void PlatEncoderDestroy(PlatEncoder encoder)
   free(encoder);
 }
 
-void PlatEncoderDrawMesh(
-  PlatContext ctx,
-  PlatEncoder encoder, PlatMesh mesh, PlatTexture plat_texture)
+void PlatEncoderSetMaterial(PlatEncoder encoder, PlatMaterial material)
 {
-  WGPUBindGroupEntry bindings[1] = {0};
-  bindings[0].nextInChain = NULL;
-  bindings[0].binding = 0;
-  bindings[0].textureView = plat_texture->view;
-
-  WGPUBindGroupDescriptor bind_group_desc = {
-    .nextInChain = NULL,
-    .label = NULL,
-    .layout = ctx->pipeline_3d.texture_bind_group_layout,
-    .entryCount = 1,
-    .entries = bindings,
-  };
-  WGPUBindGroup tex_bind_group =
-    wgpuDeviceCreateBindGroup(ctx->device, &bind_group_desc);
   wgpuRenderPassEncoderSetBindGroup(
-    encoder->render_pass, 2, tex_bind_group, 0, NULL);
+    encoder->render_pass, 2, material->bind_group, 0, NULL);
+}
 
+void PlatEncoderDrawMesh(PlatContext ctx, PlatEncoder encoder, PlatMesh mesh)
+{
   wgpuRenderPassEncoderSetVertexBuffer(
     encoder->render_pass, 0,
     mesh->vertices, 0, mesh->vertices_count * sizeof(PlatVertex3d));
@@ -310,5 +327,4 @@ void PlatEncoderDrawMesh(
     WGPUIndexFormat_Uint32, 0, mesh->indices_count * sizeof(uint32_t));
   wgpuRenderPassEncoderDrawIndexed(
     encoder->render_pass, mesh->indices_count, 1, 0, 0, 0);
-  wgpuBindGroupRelease(tex_bind_group);
 }

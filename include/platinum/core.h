@@ -14,7 +14,7 @@ typedef struct PlatContextImpl* PlatContext;
 typedef struct PlatRenderTargetImpl* PlatRenderTarget;
 typedef struct PlatEncoderImpl* PlatEncoder;
 typedef struct PlatMeshImpl* PlatMesh;
-typedef struct PlatMeshBuilderImpl* PlatMeshBuilder;
+typedef struct PlatMaterialImpl* PlatMaterial;
 typedef struct PlatTextureImpl* PlatTexture;
 typedef struct PlatCamera3dImpl* PlatCamera3d;
 
@@ -38,11 +38,15 @@ PlatRenderTarget PlatContextGetRenderTarget(PlatContext);
 void PlatRenderTargetDestroy(PlatRenderTarget);
 bool PlatRenderTargetOk(PlatRenderTarget);
 
+PlatMaterial PlatMaterialCreate(PlatContext, PlatTexture);
+void PlatMaterialDestroy(PlatMaterial);
+
 PlatEncoder PlatEncoderCreate(PlatContext);
 void PlatEncoderDestroy(PlatEncoder);
 void PlatEncoderBegin(PlatContext, PlatEncoder, const mat4, PlatRenderTarget);
 void PlatEncoderEnd(PlatContext, PlatEncoder);
-void PlatEncoderDrawMesh(PlatContext, PlatEncoder, PlatMesh, PlatTexture);
+void PlatEncoderSetMaterial(PlatEncoder, PlatMaterial);
+void PlatEncoderDrawMesh(PlatContext, PlatEncoder, PlatMesh);
 
 #ifdef __cplusplus
 }

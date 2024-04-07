@@ -39,4 +39,8 @@ struct PlatTextureImpl {
   WGPUTextureView view;
 };
 
+struct PlatMaterialImpl {
+  WGPUBindGroup bind_group;
+};
+
 #endif

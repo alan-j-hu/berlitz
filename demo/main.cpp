@@ -102,6 +102,7 @@ int main(int argc, char* argv[])
   glfwSetFramebufferSizeCallback(window, on_window_resize);
 
   PlatTexture tex = PlatTextureLoad(ctx, (base / "res/cat.png").c_str());
+  PlatMaterial material = PlatMaterialCreate(ctx, tex);
 
   PlatVertex3d vertices[4];
   vec3 v1 = {-0.5f, -0.5f, 0.5f};
@@ -138,6 +139,8 @@ int main(int argc, char* argv[])
     if (!PlatRenderTargetOk(target)) {
       PlatEncoderDestroy(encoder);
       PlatMeshDestroy(mesh);
+      PlatMaterialDestroy(material);
+      PlatTextureDestroy(tex);
       PlatContextDestroy(ctx);
       wgpuInstanceRelease(instance);
       glfwDestroyWindow(window);
@@ -147,7 +150,8 @@ int main(int argc, char* argv[])
     }
 
     PlatEncoderBegin(ctx, encoder, *PlatCamera3dViewProj(camera), target);
-    PlatEncoderDrawMesh(ctx, encoder, mesh, tex);
+    PlatEncoderSetMaterial(encoder, material);
+    PlatEncoderDrawMesh(ctx, encoder, mesh);
     PlatEncoderEnd(ctx, encoder);
     PlatRenderTargetDestroy(target);
     PlatContextPresent(ctx);
@@ -156,6 +160,7 @@ int main(int argc, char* argv[])
   PlatEncoderDestroy(encoder);
   PlatMeshDestroy(mesh);
 
+  PlatMaterialDestroy(material);
   PlatTextureDestroy(tex);
   PlatContextDestroy(ctx);
 
