@@ -48,31 +48,21 @@ void PlatPipeline3DInit(PlatContext ctx, struct PlatPipeline3d* pipeline)
   };
 
   {
-    WGPUBindGroupLayoutEntry entries[1] = {0};
+    WGPUBindGroupLayoutEntry entries[2] = {0, 0};
     entries[0].binding = 0;
     entries[0].visibility = WGPUShaderStage_Fragment;
     entries[0].sampler.type = WGPUSamplerBindingType_Filtering;
 
-    WGPUBindGroupLayoutDescriptor layout_desc = {0};
-    layout_desc.nextInChain = NULL;
-    layout_desc.entryCount = 1;
-    layout_desc.entries = entries;
-    pipeline->sampler_bind_group_layout =
-      wgpuDeviceCreateBindGroupLayout(ctx->device, &layout_desc);
-  }
-
-  {
-    WGPUBindGroupLayoutEntry entries[1] = {0};
-    entries[0].binding = 0;
-    entries[0].visibility = WGPUShaderStage_Vertex;
-    entries[0].buffer.type = WGPUBufferBindingType_Uniform;
-    entries[0].buffer.minBindingSize = sizeof(mat4);
+    entries[1].binding = 1;
+    entries[1].visibility = WGPUShaderStage_Vertex;
+    entries[1].buffer.type = WGPUBufferBindingType_Uniform;
+    entries[1].buffer.minBindingSize = sizeof(mat4);
 
     WGPUBindGroupLayoutDescriptor layout_desc = {0};
     layout_desc.nextInChain = NULL;
-    layout_desc.entryCount = 1;
+    layout_desc.entryCount = 2;
     layout_desc.entries = entries;
-    pipeline->camera_bind_group_layout =
+    pipeline->global_bind_group_layout =
       wgpuDeviceCreateBindGroupLayout(ctx->device, &layout_desc);
   }
 
@@ -87,21 +77,19 @@ void PlatPipeline3DInit(PlatContext ctx, struct PlatPipeline3d* pipeline)
     layout_desc.nextInChain = NULL;
     layout_desc.entryCount = 1;
     layout_desc.entries = entries;
-    pipeline->texture_bind_group_layout =
+    pipeline->material_bind_group_layout =
       wgpuDeviceCreateBindGroupLayout(ctx->device, &layout_desc);
   }
 
-  WGPUBindGroupLayout layouts[] = {
-    pipeline->sampler_bind_group_layout,
-    pipeline->camera_bind_group_layout,
-    pipeline->texture_bind_group_layout
-  };
+  WGPUBindGroupLayout layouts[2];
+  layouts[GLOBAL_BIND_GROUP] = pipeline->global_bind_group_layout;
+  layouts[MATERIAL_BIND_GROUP] = pipeline->material_bind_group_layout;
 
   {
     WGPUPipelineLayoutDescriptor desc = {
       .nextInChain = NULL,
       .label = "3d pipeline layout",
-      .bindGroupLayoutCount = 3,
+      .bindGroupLayoutCount = 2,
       .bindGroupLayouts = layouts
     };
 
@@ -165,33 +153,13 @@ void PlatPipeline3DInit(PlatContext ctx, struct PlatPipeline3d* pipeline)
 
   pipeline->render_pipeline =
     wgpuDeviceCreateRenderPipeline(ctx->device, &desc);
-
-  {
-    WGPUBindGroupEntry bindings[1] = {0};
-    bindings[0].nextInChain = NULL;
-    bindings[0].binding = 0;
-    bindings[0].sampler = ctx->sampler;
-
-    WGPUBindGroupDescriptor bind_group_desc = {
-      .nextInChain = NULL,
-      .label = NULL,
-      .layout = pipeline->sampler_bind_group_layout,
-      .entryCount = 1,
-      .entries = bindings,
-    };
-    WGPUBindGroup sampler_bind_group =
-      wgpuDeviceCreateBindGroup(ctx->device, &bind_group_desc);
-    pipeline->sampler_bind_group = sampler_bind_group;
-  }
 }
 
 void PlatPipeline3DDeinit(struct PlatPipeline3d* pipeline)
 {
-  wgpuBindGroupRelease(pipeline->sampler_bind_group);
   wgpuRenderPipelineRelease(pipeline->render_pipeline);
   wgpuPipelineLayoutRelease(pipeline->pipeline_layout);
-  wgpuBindGroupLayoutRelease(pipeline->texture_bind_group_layout);
-  wgpuBindGroupLayoutRelease(pipeline->camera_bind_group_layout);
-  wgpuBindGroupLayoutRelease(pipeline->sampler_bind_group_layout);
+  wgpuBindGroupLayoutRelease(pipeline->material_bind_group_layout);
+  wgpuBindGroupLayoutRelease(pipeline->global_bind_group_layout);
   wgpuShaderModuleRelease(pipeline->shader_module);
 }

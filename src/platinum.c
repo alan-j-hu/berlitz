@@ -192,7 +192,7 @@ PlatMaterial PlatMaterialCreate(PlatContext ctx, PlatTexture plat_texture)
   WGPUBindGroupDescriptor bind_group_desc = {
     .nextInChain = NULL,
     .label = NULL,
-    .layout = ctx->pipeline_3d.texture_bind_group_layout,
+    .layout = ctx->pipeline_3d.material_bind_group_layout,
     .entryCount = 1,
     .entries = bindings,
   };
@@ -221,21 +221,25 @@ PlatEncoder PlatEncoderCreate(PlatContext ctx)
   plat_encoder->camera_buffer =
     wgpuDeviceCreateBuffer(ctx->device, &buffer_desc);
 
-  WGPUBindGroupEntry bindings[1] = {0};
-  bindings[0].nextInChain = NULL;
-  bindings[0].binding = 0;
-  bindings[0].buffer = plat_encoder->camera_buffer;
-  bindings[0].offset = 0;
-  bindings[0].size = sizeof(mat4);
+  WGPUBindGroupEntry entries[2] = {0, 0};
+  entries[0].nextInChain = NULL;
+  entries[0].binding = 0;
+  entries[0].sampler = ctx->sampler;
+
+  entries[1].nextInChain = NULL;
+  entries[1].binding = 1;
+  entries[1].buffer = plat_encoder->camera_buffer;
+  entries[1].offset = 0;
+  entries[1].size = sizeof(mat4);
 
   WGPUBindGroupDescriptor bind_group_desc = {
     .nextInChain = NULL,
     .label = NULL,
-    .layout = ctx->pipeline_3d.camera_bind_group_layout,
-    .entryCount = 1,
-    .entries = bindings,
+    .layout = ctx->pipeline_3d.global_bind_group_layout,
+    .entryCount = 2,
+    .entries = entries,
   };
-  plat_encoder->camera_bind_group =
+  plat_encoder->global_bind_group =
     wgpuDeviceCreateBindGroup(ctx->device, &bind_group_desc);
 
   return plat_encoder;
@@ -277,14 +281,15 @@ void PlatEncoderBegin(
   plat_encoder->render_pass = render_pass;
 
   wgpuRenderPassEncoderSetBindGroup(
-    render_pass, 0, ctx->pipeline_3d.sampler_bind_group, 0, NULL);
+    render_pass,
+    GLOBAL_BIND_GROUP,
+    plat_encoder->global_bind_group,
+    0,
+    NULL);
 
   WGPUQueue queue = wgpuDeviceGetQueue(ctx->device);
   wgpuQueueWriteBuffer(
     queue, plat_encoder->camera_buffer, 0, viewproj, sizeof(mat4));
-
-  wgpuRenderPassEncoderSetBindGroup(
-    render_pass, 1, plat_encoder->camera_bind_group, 0, NULL);
 }
 
 void PlatEncoderEnd(PlatContext ctx, PlatEncoder encoder)
@@ -307,14 +312,14 @@ void PlatEncoderDestroy(PlatEncoder encoder)
 {
   wgpuBufferDestroy(encoder->camera_buffer);
   wgpuBufferRelease(encoder->camera_buffer);
-  wgpuBindGroupRelease(encoder->camera_bind_group);
+  wgpuBindGroupRelease(encoder->global_bind_group);
   free(encoder);
 }
 
 void PlatEncoderSetMaterial(PlatEncoder encoder, PlatMaterial material)
 {
   wgpuRenderPassEncoderSetBindGroup(
-    encoder->render_pass, 2, material->bind_group, 0, NULL);
+    encoder->render_pass, MATERIAL_BIND_GROUP, material->bind_group, 0, NULL);
 }
 
 void PlatEncoderDrawMesh(PlatContext ctx, PlatEncoder encoder, PlatMesh mesh)

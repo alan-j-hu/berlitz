@@ -5,13 +5,10 @@
 
 struct PlatPipeline3d {
   WGPUShaderModule shader_module;
-  WGPUBindGroupLayout sampler_bind_group_layout;
-  WGPUBindGroupLayout camera_bind_group_layout;
-  WGPUBindGroupLayout texture_bind_group_layout;
+  WGPUBindGroupLayout global_bind_group_layout;
+  WGPUBindGroupLayout material_bind_group_layout;
   WGPUPipelineLayout pipeline_layout;
   WGPURenderPipeline render_pipeline;
-
-  WGPUBindGroup sampler_bind_group;
 };
 
 void PlatPipeline3DInit(PlatContext ctx, struct PlatPipeline3d* pipeline);

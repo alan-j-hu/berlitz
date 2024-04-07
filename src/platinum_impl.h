@@ -4,6 +4,10 @@
 #include "platinum/platinum.h"
 #include "3d/3d_impl.h"
 
+#define GLOBAL_BIND_GROUP 0
+#define MATERIAL_BIND_GROUP 1
+#define OBJECT_BIND_GROUP 2
+
 struct PlatRenderTargetImpl {
   WGPUTextureView view;
 };
@@ -30,7 +34,7 @@ struct PlatEncoderImpl {
   WGPUCommandEncoder encoder;
   WGPURenderPassEncoder render_pass;
 
-  WGPUBindGroup camera_bind_group;
+  WGPUBindGroup global_bind_group;
   WGPUBuffer camera_buffer;
 };
 

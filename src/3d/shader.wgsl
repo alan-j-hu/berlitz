@@ -1,6 +1,6 @@
 @group(0) @binding(0) var tex_sampler: sampler;
-@group(1) @binding(0) var<uniform> camera: mat4x4f;
-@group(2) @binding(0) var texture: texture_2d<f32>;
+@group(0) @binding(1) var<uniform> camera: mat4x4f;
+@group(1) @binding(0) var texture: texture_2d<f32>;
 
 struct Vertex {
   @location(0) pos: vec3f,
