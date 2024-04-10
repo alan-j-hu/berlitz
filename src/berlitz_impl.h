@@ -1,18 +1,18 @@
-#ifndef PLATINUM_IMPL_H
-#define PLATINUM_IMPL_H
+#ifndef BERLITZ_IMPL_H
+#define BERLITZ_IMPL_H
 
-#include "platinum/platinum.h"
+#include "berlitz/berlitz.h"
 #include "3d/3d_impl.h"
 
 #define GLOBAL_BIND_GROUP 0
 #define MATERIAL_BIND_GROUP 1
 #define OBJECT_BIND_GROUP 2
 
-struct PlatRenderTargetImpl {
+struct BerlRenderTargetImpl {
   WGPUTextureView view;
 };
 
-struct PlatContextImpl {
+struct BerlContextImpl {
   int width;
   int height;
   LogCallback log;
@@ -27,10 +27,10 @@ struct PlatContextImpl {
   WGPUBuffer uniform_buffer;
   WGPUColor clear_color;
   WGPUSampler sampler;
-  struct PlatPipeline3d pipeline_3d;
+  struct BerlPipeline3d pipeline_3d;
 };
 
-struct PlatEncoderImpl {
+struct BerlEncoderImpl {
   WGPUCommandEncoder encoder;
   WGPURenderPassEncoder render_pass;
 
@@ -38,16 +38,16 @@ struct PlatEncoderImpl {
   WGPUBuffer camera_buffer;
 };
 
-struct PlatTextureImpl {
+struct BerlTextureImpl {
   WGPUTexture texture;
   WGPUTextureView view;
 };
 
-struct PlatMaterialImpl {
+struct BerlMaterialImpl {
   WGPUBindGroup bind_group;
 };
 
-struct PlatObjectDataImpl {
+struct BerlObjectDataImpl {
   mat4 transform_matrix;
   WGPUBindGroup bind_group;
   WGPUBuffer transform_buffer;

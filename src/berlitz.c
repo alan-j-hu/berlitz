@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "platinum/platinum.h"
-#include "platinum_impl.h"
+#include "berlitz/berlitz.h"
+#include "berlitz_impl.h"
 #include "3d/3d_impl.h"
 
 typedef struct AdapterCallbackEnv {
@@ -45,11 +45,11 @@ void deviceCallback(
 void deviceUncapturedErrorCallback(
   WGPUErrorType type, char const * message, void * userdata)
 {
-  PlatContext ctx = (PlatContext) userdata;
+  BerlContext ctx = (BerlContext) userdata;
   ctx->log(message);
 }
 
-WGPUSwapChain PlatCreateSwapchain(PlatContext ctx, int width, int height)
+WGPUSwapChain BerlCreateSwapchain(BerlContext ctx, int width, int height)
 {
   WGPUSwapChainDescriptor desc = {0};
   desc.nextInChain = NULL;
@@ -62,9 +62,9 @@ WGPUSwapChain PlatCreateSwapchain(PlatContext ctx, int width, int height)
   return wgpuDeviceCreateSwapChain(ctx->device, ctx->surface, &desc);
 }
 
-PlatContext PlatContextCreate(PlatContextParams* params)
+BerlContext BerlContextCreate(BerlContextParams* params)
 {
-  PlatContext ctx = malloc(sizeof(struct PlatContextImpl));
+  BerlContext ctx = malloc(sizeof(struct BerlContextImpl));
   ctx->width = params->width;
   ctx->height = params->height;
   ctx->instance = params->instance;
@@ -102,7 +102,7 @@ PlatContext PlatContextCreate(PlatContextParams* params)
   }
 
   {
-    ctx->swapchain = PlatCreateSwapchain(ctx, ctx->width, ctx->height);
+    ctx->swapchain = BerlCreateSwapchain(ctx, ctx->width, ctx->height);
   }
 
   {
@@ -132,14 +132,14 @@ PlatContext PlatContextCreate(PlatContextParams* params)
     ctx->uniform_buffer = buffer;
   }
 
-  PlatPipeline3DInit(ctx, &ctx->pipeline_3d);
+  BerlPipeline3DInit(ctx, &ctx->pipeline_3d);
 
   return ctx;
 }
 
-void PlatContextDestroy(PlatContext ctx)
+void BerlContextDestroy(BerlContext ctx)
 {
-  PlatPipeline3DDeinit(&ctx->pipeline_3d);
+  BerlPipeline3DDeinit(&ctx->pipeline_3d);
   wgpuSamplerRelease(ctx->sampler);
   wgpuSwapChainRelease(ctx->swapchain);
   wgpuDeviceRelease(ctx->device);
@@ -147,42 +147,42 @@ void PlatContextDestroy(PlatContext ctx)
   free(ctx);
 }
 
-void PlatContextResize(PlatContext ctx, int w, int h)
+void BerlContextResize(BerlContext ctx, int w, int h)
 {
   wgpuSwapChainRelease(ctx->swapchain);
-  ctx->swapchain = PlatCreateSwapchain(ctx, w, h);
+  ctx->swapchain = BerlCreateSwapchain(ctx, w, h);
   ctx->width = w;
   ctx->height = h;
 }
 
-PlatRenderTarget PlatContextGetRenderTarget(PlatContext ctx)
+BerlRenderTarget BerlContextGetRenderTarget(BerlContext ctx)
 {
   WGPUTextureView view = wgpuSwapChainGetCurrentTextureView(ctx->swapchain);
-  PlatRenderTarget target = malloc(sizeof(struct PlatRenderTargetImpl));
+  BerlRenderTarget target = malloc(sizeof(struct BerlRenderTargetImpl));
   target->view = view;
   return target;
 }
 
-void PlatContextPresent(PlatContext ctx)
+void BerlContextPresent(BerlContext ctx)
 {
   wgpuSwapChainPresent(ctx->swapchain);
   wgpuDeviceTick(ctx->device);
 }
 
-void PlatRenderTargetDestroy(PlatRenderTarget target)
+void BerlRenderTargetDestroy(BerlRenderTarget target)
 {
   wgpuTextureViewRelease(target->view);
   free(target);
 }
 
-bool PlatRenderTargetOk(PlatRenderTarget target)
+bool BerlRenderTargetOk(BerlRenderTarget target)
 {
   return !!target->view;
 }
 
-PlatMaterial PlatMaterialCreate(PlatContext ctx, PlatTexture plat_texture)
+BerlMaterial BerlMaterialCreate(BerlContext ctx, BerlTexture plat_texture)
 {
-  PlatMaterial material = malloc(sizeof(struct PlatMaterialImpl));
+  BerlMaterial material = malloc(sizeof(struct BerlMaterialImpl));
 
   WGPUBindGroupEntry bindings[1] = {0};
   bindings[0].nextInChain = NULL;
@@ -204,15 +204,15 @@ PlatMaterial PlatMaterialCreate(PlatContext ctx, PlatTexture plat_texture)
   return material;
 }
 
-void PlatMaterialDestroy(PlatMaterial material)
+void BerlMaterialDestroy(BerlMaterial material)
 {
   wgpuBindGroupRelease(material->bind_group);
   free(material);
 }
 
-PlatObjectData PlatObjectDataCreate(PlatContext ctx)
+BerlObjectData BerlObjectDataCreate(BerlContext ctx)
 {
-  PlatObjectData data = malloc(sizeof(struct PlatObjectDataImpl));
+  BerlObjectData data = malloc(sizeof(struct BerlObjectDataImpl));
 
   WGPUBufferDescriptor buffer_desc = {0};
   buffer_desc.size = sizeof(mat4);
@@ -243,7 +243,7 @@ PlatObjectData PlatObjectDataCreate(PlatContext ctx)
   return data;
 }
 
-void PlatObjectDataDestroy(PlatObjectData data)
+void BerlObjectDataDestroy(BerlObjectData data)
 {
   wgpuBufferDestroy(data->transform_buffer);
   wgpuBufferRelease(data->transform_buffer);
@@ -251,15 +251,15 @@ void PlatObjectDataDestroy(PlatObjectData data)
   free(data);
 }
 
-PlatEncoder PlatEncoderCreate(PlatContext ctx)
+BerlEncoder BerlEncoderCreate(BerlContext ctx)
 {
-  PlatEncoder plat_encoder = malloc(sizeof(struct PlatEncoderImpl));
+  BerlEncoder berl_encoder = malloc(sizeof(struct BerlEncoderImpl));
 
   WGPUBufferDescriptor buffer_desc = {0};
   buffer_desc.size = sizeof(mat4);
   buffer_desc.usage = WGPUBufferUsage_CopyDst | WGPUBufferUsage_Uniform;
   buffer_desc.mappedAtCreation = 0;
-  plat_encoder->camera_buffer =
+  berl_encoder->camera_buffer =
     wgpuDeviceCreateBuffer(ctx->device, &buffer_desc);
 
   WGPUBindGroupEntry entries[2] = {0, 0};
@@ -269,7 +269,7 @@ PlatEncoder PlatEncoderCreate(PlatContext ctx)
 
   entries[1].nextInChain = NULL;
   entries[1].binding = 1;
-  entries[1].buffer = plat_encoder->camera_buffer;
+  entries[1].buffer = berl_encoder->camera_buffer;
   entries[1].offset = 0;
   entries[1].size = sizeof(mat4);
 
@@ -280,24 +280,24 @@ PlatEncoder PlatEncoderCreate(PlatContext ctx)
     .entryCount = 2,
     .entries = entries,
   };
-  plat_encoder->global_bind_group =
+  berl_encoder->global_bind_group =
     wgpuDeviceCreateBindGroup(ctx->device, &bind_group_desc);
 
-  return plat_encoder;
+  return berl_encoder;
 }
 
-void PlatEncoderBegin(
-  PlatContext ctx,
-  PlatEncoder plat_encoder,
+void BerlEncoderBegin(
+  BerlContext ctx,
+  BerlEncoder berl_encoder,
   const mat4 viewproj,
-  PlatRenderTarget target)
+  BerlRenderTarget target)
 {
   WGPUCommandEncoderDescriptor enc_desc = {0};
   enc_desc.nextInChain = NULL;
   enc_desc.label = "Encoder";
   WGPUCommandEncoder encoder =
     wgpuDeviceCreateCommandEncoder(ctx->device, &enc_desc);
-  plat_encoder->encoder = encoder;
+  berl_encoder->encoder = encoder;
 
   WGPURenderPassDescriptor desc = {0};
   desc.nextInChain = NULL;
@@ -319,21 +319,21 @@ void PlatEncoderBegin(
     wgpuCommandEncoderBeginRenderPass(encoder, &desc);
   wgpuRenderPassEncoderSetPipeline(
     render_pass, ctx->pipeline_3d.render_pipeline);
-  plat_encoder->render_pass = render_pass;
+  berl_encoder->render_pass = render_pass;
 
   wgpuRenderPassEncoderSetBindGroup(
     render_pass,
     GLOBAL_BIND_GROUP,
-    plat_encoder->global_bind_group,
+    berl_encoder->global_bind_group,
     0,
     NULL);
 
   WGPUQueue queue = wgpuDeviceGetQueue(ctx->device);
   wgpuQueueWriteBuffer(
-    queue, plat_encoder->camera_buffer, 0, viewproj, sizeof(mat4));
+    queue, berl_encoder->camera_buffer, 0, viewproj, sizeof(mat4));
 }
 
-void PlatEncoderEnd(PlatContext ctx, PlatEncoder encoder)
+void BerlEncoderEnd(BerlContext ctx, BerlEncoder encoder)
 {
   wgpuRenderPassEncoderEnd(encoder->render_pass);
   wgpuRenderPassEncoderRelease(encoder->render_pass);
@@ -349,7 +349,7 @@ void PlatEncoderEnd(PlatContext ctx, PlatEncoder encoder)
   wgpuCommandBufferRelease(command);
 }
 
-void PlatEncoderDestroy(PlatEncoder encoder)
+void BerlEncoderDestroy(BerlEncoder encoder)
 {
   wgpuBufferDestroy(encoder->camera_buffer);
   wgpuBufferRelease(encoder->camera_buffer);
@@ -357,17 +357,17 @@ void PlatEncoderDestroy(PlatEncoder encoder)
   free(encoder);
 }
 
-void PlatEncoderSetMaterial(PlatEncoder encoder, PlatMaterial material)
+void BerlEncoderSetMaterial(BerlEncoder encoder, BerlMaterial material)
 {
   wgpuRenderPassEncoderSetBindGroup(
     encoder->render_pass, MATERIAL_BIND_GROUP, material->bind_group, 0, NULL);
 }
 
-void PlatEncoderDrawMesh(
-  PlatContext ctx,
-  PlatEncoder encoder,
-  PlatObjectData data,
-  PlatMesh mesh)
+void BerlEncoderDrawMesh(
+  BerlContext ctx,
+  BerlEncoder encoder,
+  BerlObjectData data,
+  BerlMesh mesh)
 {
   wgpuRenderPassEncoderSetBindGroup(
     encoder->render_pass,
@@ -383,7 +383,7 @@ void PlatEncoderDrawMesh(
 
   wgpuRenderPassEncoderSetVertexBuffer(
     encoder->render_pass, 0,
-    mesh->vertices, 0, mesh->vertices_count * sizeof(PlatVertex3d));
+    mesh->vertices, 0, mesh->vertices_count * sizeof(BerlVertex3d));
   wgpuRenderPassEncoderSetIndexBuffer(
     encoder->render_pass, mesh->indices,
     WGPUIndexFormat_Uint32, 0, mesh->indices_count * sizeof(uint32_t));

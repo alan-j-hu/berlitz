@@ -1,8 +1,8 @@
-#include "platinum/3d/camera.h"
+#include "berlitz/3d/camera.h"
 #include "cglm/cam.h"
 #include "cglm/vec3.h"
 
-struct PlatCamera3dImpl
+struct BerlCamera3dImpl
 {
   mat4 view;
   mat4 proj;
@@ -20,9 +20,9 @@ struct PlatCamera3dImpl
   _Bool proj_dirty : 1;
 };
 
-PlatCamera3d PlatCamera3dCreate(PlatCamera3dParams* params)
+BerlCamera3d BerlCamera3dCreate(BerlCamera3dParams* params)
 {
-  PlatCamera3d camera = malloc(sizeof(struct PlatCamera3dImpl));
+  BerlCamera3d camera = malloc(sizeof(struct BerlCamera3dImpl));
   camera->up[0] = 0;
   camera->up[1] = 1;
   camera->up[2] = 0;
@@ -45,13 +45,13 @@ PlatCamera3d PlatCamera3dCreate(PlatCamera3dParams* params)
   return camera;
 }
 
-void PlatCamera3dDestroy(PlatCamera3d camera)
+void BerlCamera3dDestroy(BerlCamera3d camera)
 {
   free(camera);
 }
 
 /* Returns 0 if the vec dest was left unchanged, returns 1 otherwise. */
-_Bool PlatCamera3dSetVec3(vec3 update, vec3 dest)
+_Bool BerlCamera3dSetVec3(vec3 update, vec3 dest)
 {
   const float x = update[0];
   const float y = update[1];
@@ -65,27 +65,27 @@ _Bool PlatCamera3dSetVec3(vec3 update, vec3 dest)
   return 1;
 }
 
-const vec3* PlatCamera3dPos(PlatCamera3d camera)
+const vec3* BerlCamera3dPos(BerlCamera3d camera)
 {
   return &camera->position;
 }
 
-void PlatCamera3dSetPos(PlatCamera3d camera, vec3 pos)
+void BerlCamera3dSetPos(BerlCamera3d camera, vec3 pos)
 {
-  camera->view_dirty |= PlatCamera3dSetVec3(pos, camera->position);
+  camera->view_dirty |= BerlCamera3dSetVec3(pos, camera->position);
 }
 
-const vec3* PlatCamera3dTarget(PlatCamera3d camera)
+const vec3* BerlCamera3dTarget(BerlCamera3d camera)
 {
   return &camera->target;
 }
 
-void PlatCamera3dSetTarget(PlatCamera3d camera, vec3 target)
+void BerlCamera3dSetTarget(BerlCamera3d camera, vec3 target)
 {
-  camera->view_dirty |= PlatCamera3dSetVec3(target, camera->target);
+  camera->view_dirty |= BerlCamera3dSetVec3(target, camera->target);
 }
 
-const mat4* PlatCamera3dView(PlatCamera3d camera)
+const mat4* BerlCamera3dView(BerlCamera3d camera)
 {
   if (camera->view_dirty) {
     glm_lookat(camera->position, camera->target, camera->up, camera->view);
@@ -94,7 +94,7 @@ const mat4* PlatCamera3dView(PlatCamera3d camera)
   return &camera->view;
 }
 
-const mat4* PlatCamera3dProj(PlatCamera3d camera)
+const mat4* BerlCamera3dProj(BerlCamera3d camera)
 {
   if (camera->proj_dirty) {
     glm_perspective(
@@ -108,11 +108,11 @@ const mat4* PlatCamera3dProj(PlatCamera3d camera)
   return &camera->proj;
 }
 
-const mat4* PlatCamera3dViewProj(PlatCamera3d camera)
+const mat4* BerlCamera3dViewProj(BerlCamera3d camera)
 {
   if (camera->view_dirty || camera->proj_dirty) {
-    PlatCamera3dView(camera);
-    PlatCamera3dProj(camera);
+    BerlCamera3dView(camera);
+    BerlCamera3dProj(camera);
     glm_mat4_mul(camera->proj, camera->view, camera->viewproj);
   }
   return &camera->viewproj;

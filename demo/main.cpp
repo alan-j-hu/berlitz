@@ -1,5 +1,5 @@
 #include "webgpu/webgpu.h"
-#include "platinum/platinum.h"
+#include "berlitz/berlitz.h"
 #include <cmath>
 #include <cstring>
 #include <filesystem>
@@ -17,43 +17,38 @@ void debug_log(const char* message)
 
 void on_window_resize(GLFWwindow* window, int w, int h)
 {
-  PlatContext ctx = static_cast<PlatContext>(glfwGetWindowUserPointer(window));
-  PlatContextResize(ctx, w, h);
+  BerlContext ctx = static_cast<BerlContext>(glfwGetWindowUserPointer(window));
+  BerlContextResize(ctx, w, h);
 }
 
 int main(int argc, char* argv[])
 {
   const double PI = 4 * std::atan(1);
-  PlatCamera3dParams camera_params {};
+  BerlCamera3dParams camera_params {};
   camera_params.fov_rad = PI / 4;
   camera_params.near_clip = 0.1;
   camera_params.far_clip = 5.0;
-  PlatCamera3d camera = PlatCamera3dCreate(&camera_params);
+  BerlCamera3d camera = BerlCamera3dCreate(&camera_params);
 
   vec3 camera_pos;
   camera_pos[0] = 0;
   camera_pos[1] = 0;
   camera_pos[2] = -1;
-  PlatCamera3dSetPos(camera, camera_pos);
+  BerlCamera3dSetPos(camera, camera_pos);
 
   vec3 camera_target;
   camera_target[0] = 0;
   camera_target[1] = 0;
   camera_target[2] = 0;
-  PlatCamera3dSetTarget(camera, camera_target);
-
-  /*mat4 viewproj;
-  glm_mat4_identity(viewproj);
-  viewproj[0][0] = 2.0;
-  viewproj[1][1] = 0.5;*/
+  BerlCamera3dSetTarget(camera, camera_target);
 
   if (!glfwInit()) {
-    PlatCamera3dDestroy(camera);
+    BerlCamera3dDestroy(camera);
     return 1;
   }
   if (SDL_Init(0) < 0) {
     glfwTerminate();
-    PlatCamera3dDestroy(camera);
+    BerlCamera3dDestroy(camera);
     return 1;
   }
 
@@ -67,7 +62,7 @@ int main(int argc, char* argv[])
     SDL_free(base_path);
     SDL_Quit();
     glfwTerminate();
-    PlatCamera3dDestroy(camera);
+    BerlCamera3dDestroy(camera);
     return 1;
   }
 
@@ -82,13 +77,13 @@ int main(int argc, char* argv[])
     SDL_Quit();
     glfwDestroyWindow(window);
     glfwTerminate();
-    PlatCamera3dDestroy(camera);
+    BerlCamera3dDestroy(camera);
     return 1;
   }
 
   WGPUSurface surface = wgpu::glfw::CreateSurfaceForWindow(instance, window)
     .MoveToCHandle();
-  PlatContextParams params {};
+  BerlContextParams params {};
   params.width = 100;
   params.height = 100;
   params.instance = instance;
@@ -96,15 +91,15 @@ int main(int argc, char* argv[])
   params.clear_color = (WGPUColor){
     .r = 1.0, .g = 1.0, .b = 0.0, .a = 1.0 };
   params.log = debug_log;
-  PlatContext ctx = PlatContextCreate(&params);
+  BerlContext ctx = BerlContextCreate(&params);
 
   glfwSetWindowUserPointer(window, ctx);
   glfwSetFramebufferSizeCallback(window, on_window_resize);
 
-  PlatTexture tex = PlatTextureLoad(ctx, (base / "res/cat.png").c_str());
-  PlatMaterial material = PlatMaterialCreate(ctx, tex);
+  BerlTexture tex = BerlTextureLoad(ctx, (base / "res/cat.png").c_str());
+  BerlMaterial material = BerlMaterialCreate(ctx, tex);
 
-  PlatVertex3d vertices[4];
+  BerlVertex3d vertices[4];
   vec3 v1 = {-0.5f, -0.5f, 0.5f};
   std::memcpy(vertices[0].pos, v1, sizeof(vec3));
   vec2 t1 = {0.0, 1.0};
@@ -130,42 +125,42 @@ int main(int argc, char* argv[])
     0, 2, 3
   };
 
-  PlatMesh mesh = PlatMeshCreate(ctx, vertices, 4, indices, 6);
-  PlatObjectData obj = PlatObjectDataCreate(ctx);
-  PlatEncoder encoder = PlatEncoderCreate(ctx);
+  BerlMesh mesh = BerlMeshCreate(ctx, vertices, 4, indices, 6);
+  BerlObjectData obj = BerlObjectDataCreate(ctx);
+  BerlEncoder encoder = BerlEncoderCreate(ctx);
 
   while(!glfwWindowShouldClose(window)) {
     glfwPollEvents();
-    PlatRenderTarget target = PlatContextGetRenderTarget(ctx);
-    if (!PlatRenderTargetOk(target)) {
-      PlatEncoderDestroy(encoder);
-      PlatObjectDataDestroy(obj);
-      PlatMeshDestroy(mesh);
-      PlatMaterialDestroy(material);
-      PlatTextureDestroy(tex);
-      PlatContextDestroy(ctx);
+    BerlRenderTarget target = BerlContextGetRenderTarget(ctx);
+    if (!BerlRenderTargetOk(target)) {
+      BerlEncoderDestroy(encoder);
+      BerlObjectDataDestroy(obj);
+      BerlMeshDestroy(mesh);
+      BerlMaterialDestroy(material);
+      BerlTextureDestroy(tex);
+      BerlContextDestroy(ctx);
       wgpuInstanceRelease(instance);
       glfwDestroyWindow(window);
       glfwTerminate();
-      PlatCamera3dDestroy(camera);
+      BerlCamera3dDestroy(camera);
       return 1;
     }
 
-    PlatEncoderBegin(ctx, encoder, *PlatCamera3dViewProj(camera), target);
-    PlatEncoderSetMaterial(encoder, material);
-    PlatEncoderDrawMesh(ctx, encoder, obj, mesh);
-    PlatEncoderEnd(ctx, encoder);
-    PlatRenderTargetDestroy(target);
-    PlatContextPresent(ctx);
+    BerlEncoderBegin(ctx, encoder, *BerlCamera3dViewProj(camera), target);
+    BerlEncoderSetMaterial(encoder, material);
+    BerlEncoderDrawMesh(ctx, encoder, obj, mesh);
+    BerlEncoderEnd(ctx, encoder);
+    BerlRenderTargetDestroy(target);
+    BerlContextPresent(ctx);
   }
 
-  PlatEncoderDestroy(encoder);
-  PlatObjectDataDestroy(obj);
-  PlatMeshDestroy(mesh);
+  BerlEncoderDestroy(encoder);
+  BerlObjectDataDestroy(obj);
+  BerlMeshDestroy(mesh);
 
-  PlatMaterialDestroy(material);
-  PlatTextureDestroy(tex);
-  PlatContextDestroy(ctx);
+  BerlMaterialDestroy(material);
+  BerlTextureDestroy(tex);
+  BerlContextDestroy(ctx);
 
   wgpuInstanceRelease(instance);
 
@@ -173,6 +168,6 @@ int main(int argc, char* argv[])
   SDL_Quit();
   glfwDestroyWindow(window);
   glfwTerminate();
-  PlatCamera3dDestroy(camera);
+  BerlCamera3dDestroy(camera);
   return 0;
 }

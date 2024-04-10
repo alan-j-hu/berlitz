@@ -1,9 +1,9 @@
-#ifndef PLATINUM_3D_IMPL_H
-#define PLATINUM_3D_IMPL_H
+#ifndef BERLITZ_3D_IMPL_H
+#define BERLITZ_3D_IMPL_H
 
 #include "cglm/vec3.h"
 
-struct PlatPipeline3d {
+struct BerlPipeline3d {
   WGPUShaderModule shader_module;
   WGPUBindGroupLayout global_bind_group_layout;
   WGPUBindGroupLayout material_bind_group_layout;
@@ -12,17 +12,17 @@ struct PlatPipeline3d {
   WGPURenderPipeline render_pipeline;
 };
 
-void PlatPipeline3DInit(PlatContext ctx, struct PlatPipeline3d* pipeline);
-void PlatPipeline3DDeinit(struct PlatPipeline3d* pipeline);
+void BerlPipeline3DInit(BerlContext ctx, struct BerlPipeline3d* pipeline);
+void BerlPipeline3DDeinit(struct BerlPipeline3d* pipeline);
 
-struct PlatMeshImpl {
+struct BerlMeshImpl {
   size_t vertices_count;
   WGPUBuffer vertices;
   size_t indices_count;
   WGPUBuffer indices;
 };
 
-struct PlatCameraImpl {
+struct BerlCameraImpl {
   vec3 pos;
   vec3 target;
 };

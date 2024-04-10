@@ -1,5 +1,5 @@
-#ifndef PLATINUM_H
-#define PLATINUM_H
+#ifndef BERLITZ_H
+#define BERLITZ_H
 
 #include "core.h"
 #include "texture.h"

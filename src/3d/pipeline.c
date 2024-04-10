@@ -1,11 +1,11 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include "cglm/mat4.h"
-#include "platinum/platinum.h"
-#include "../platinum_impl.h"
+#include "berlitz/berlitz.h"
+#include "../berlitz_impl.h"
 #include "3d_impl.h"
 
-void PlatPipeline3DInit(PlatContext ctx, struct PlatPipeline3d* pipeline)
+void BerlPipeline3DInit(BerlContext ctx, struct BerlPipeline3d* pipeline)
 {
   char code[] = {
 #include "3d/shader.gen"
@@ -31,19 +31,19 @@ void PlatPipeline3DInit(PlatContext ctx, struct PlatPipeline3d* pipeline)
   vertex_attrs[0] = (struct WGPUVertexAttribute){
     .shaderLocation = 0,
     .format = WGPUVertexFormat_Float32x3,
-    .offset = offsetof(PlatVertex3d, pos)
+    .offset = offsetof(BerlVertex3d, pos)
   };
   vertex_attrs[1] = (struct WGPUVertexAttribute){
     .shaderLocation = 1,
     .format = WGPUVertexFormat_Float32x2,
-    .offset = offsetof(PlatVertex3d, tex_coord)
+    .offset = offsetof(BerlVertex3d, tex_coord)
   };
 
   WGPUVertexBufferLayout vert_buf_layouts[1] = {0};
   vert_buf_layouts[0] = (struct WGPUVertexBufferLayout){
     .attributeCount = 2,
     .attributes = vertex_attrs,
-    .arrayStride = sizeof(PlatVertex3d),
+    .arrayStride = sizeof(BerlVertex3d),
     .stepMode = WGPUVertexStepMode_Vertex
   };
 
@@ -171,7 +171,7 @@ void PlatPipeline3DInit(PlatContext ctx, struct PlatPipeline3d* pipeline)
     wgpuDeviceCreateRenderPipeline(ctx->device, &desc);
 }
 
-void PlatPipeline3DDeinit(struct PlatPipeline3d* pipeline)
+void BerlPipeline3DDeinit(struct BerlPipeline3d* pipeline)
 {
   wgpuRenderPipelineRelease(pipeline->render_pipeline);
   wgpuPipelineLayoutRelease(pipeline->pipeline_layout);

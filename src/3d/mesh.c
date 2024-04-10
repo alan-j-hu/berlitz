@@ -1,21 +1,21 @@
-#include "platinum/3d/mesh.h"
-#include "../platinum_impl.h"
+#include "berlitz/3d/mesh.h"
+#include "../berlitz_impl.h"
 #include "3d_impl.h"
 #include <memory.h>
 
-PlatMesh PlatMeshCreate(
-  PlatContext ctx,
-  PlatVertex3d* vertices, size_t vc,
+BerlMesh BerlMeshCreate(
+  BerlContext ctx,
+  BerlVertex3d* vertices, size_t vc,
   uint32_t* indices, size_t ic)
 {
-  PlatMesh mesh = malloc(sizeof(struct PlatMeshImpl));
+  BerlMesh mesh = malloc(sizeof(struct BerlMeshImpl));
   WGPUQueue queue = wgpuDeviceGetQueue(ctx->device);
 
   WGPUBufferDescriptor vdesc = {
     .nextInChain = NULL,
     .label = "",
     .usage = WGPUBufferUsage_CopyDst | WGPUBufferUsage_Vertex,
-    .size = vc * sizeof(PlatVertex3d),
+    .size = vc * sizeof(BerlVertex3d),
     .mappedAtCreation = false
   };
   WGPUBuffer vbuf = wgpuDeviceCreateBuffer(ctx->device, &vdesc);
@@ -38,7 +38,7 @@ PlatMesh PlatMeshCreate(
   return mesh;
 }
 
-void PlatMeshDestroy(PlatMesh mesh)
+void BerlMeshDestroy(BerlMesh mesh)
 {
   wgpuBufferDestroy(mesh->vertices);
   wgpuBufferRelease(mesh->vertices);

@@ -1,10 +1,10 @@
-#include "platinum/texture.h"
-#include "platinum_impl.h"
+#include "berlitz/texture.h"
+#include "berlitz_impl.h"
 #include "stb_image.h"
 
-PlatTexture PlatTextureCreate(PlatContext ctx, int w, int h)
+BerlTexture BerlTextureCreate(BerlContext ctx, int w, int h)
 {
-  PlatTexture plat_texture = malloc(sizeof(struct PlatTextureImpl));
+  BerlTexture berl_texture = malloc(sizeof(struct BerlTextureImpl));
   WGPUTextureFormat format = WGPUTextureFormat_RGBA8Unorm;
 
   WGPUTextureDescriptor desc = {
@@ -39,20 +39,20 @@ PlatTexture PlatTextureCreate(PlatContext ctx, int w, int h)
 
   WGPUTextureView view = wgpuTextureCreateView(texture, &view_desc);
 
-  plat_texture->texture = texture;
-  plat_texture->view = view;
+  berl_texture->texture = texture;
+  berl_texture->view = view;
 
-  return plat_texture;
+  return berl_texture;
 }
 
-void PlatTextureUpload(
-  PlatContext ctx, PlatTexture plat_texture, void* data)
+void BerlTextureUpload(
+  BerlContext ctx, BerlTexture berl_texture, void* data)
 {
-  int w = wgpuTextureGetWidth(plat_texture->texture);
-  int h = wgpuTextureGetHeight(plat_texture->texture);
+  int w = wgpuTextureGetWidth(berl_texture->texture);
+  int h = wgpuTextureGetHeight(berl_texture->texture);
   WGPUImageCopyTexture dst = {
     .nextInChain = NULL,
-    .texture = plat_texture->texture,
+    .texture = berl_texture->texture,
     .mipLevel = 0,
     .origin = {
       .x = 0,
@@ -78,20 +78,20 @@ void PlatTextureUpload(
   wgpuQueueWriteTexture(queue, &dst, data, 4 * w * h, &src, &extent);
 }
 
-PlatTexture PlatTextureLoad(PlatContext ctx, const char* filename)
+BerlTexture BerlTextureLoad(BerlContext ctx, const char* filename)
 {
   int w, h, channels;
   stbi_uc* pixels = stbi_load(filename, &w, &h, &channels, 4);
-  PlatTexture plat_texture = PlatTextureCreate(ctx, w, h);
-  PlatTextureUpload(ctx, plat_texture, pixels);
+  BerlTexture berl_texture = BerlTextureCreate(ctx, w, h);
+  BerlTextureUpload(ctx, berl_texture, pixels);
   stbi_image_free(pixels);
-  return plat_texture;
+  return berl_texture;
 }
 
-void PlatTextureDestroy(PlatTexture plat_texture)
+void BerlTextureDestroy(BerlTexture berl_texture)
 {
-  wgpuTextureViewRelease(plat_texture->view);
-  wgpuTextureDestroy(plat_texture->texture);
-  wgpuTextureRelease(plat_texture->texture);
-  free(plat_texture);
+  wgpuTextureViewRelease(berl_texture->view);
+  wgpuTextureDestroy(berl_texture->texture);
+  wgpuTextureRelease(berl_texture->texture);
+  free(berl_texture);
 }
