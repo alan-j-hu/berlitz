@@ -184,22 +184,28 @@ BerlMaterial BerlMaterialCreate(BerlContext ctx, BerlTexture plat_texture)
 {
   BerlMaterial material = malloc(sizeof(struct BerlMaterialImpl));
 
-  WGPUBindGroupEntry bindings[1] = {0};
-  bindings[0].nextInChain = NULL;
-  bindings[0].binding = 0;
-  bindings[0].textureView = plat_texture->view;
+  WGPUBindGroupEntry entries[2] = {0, 0};
+  entries[0].nextInChain = NULL;
+  entries[0].binding = 0;
+  entries[0].textureView = plat_texture->view;
+
+  entries[1].nextInChain = NULL;
+  entries[1].binding = 1;
+  entries[1].sampler = ctx->sampler;
 
   WGPUBindGroupDescriptor bind_group_desc = {
     .nextInChain = NULL,
     .label = NULL,
     .layout = ctx->pipeline_3d.material_bind_group_layout,
-    .entryCount = 1,
-    .entries = bindings,
+    .entryCount = 2,
+    .entries = entries,
   };
   WGPUBindGroup bind_group =
     wgpuDeviceCreateBindGroup(ctx->device, &bind_group_desc);
 
   material->bind_group = bind_group;
+  material->sampler = ctx->sampler;
+  wgpuSamplerReference(material->sampler);
 
   return material;
 }
@@ -207,6 +213,7 @@ BerlMaterial BerlMaterialCreate(BerlContext ctx, BerlTexture plat_texture)
 void BerlMaterialDestroy(BerlMaterial material)
 {
   wgpuBindGroupRelease(material->bind_group);
+  wgpuSamplerReference(material->sampler);
   free(material);
 }
 
@@ -262,22 +269,19 @@ BerlEncoder BerlEncoderCreate(BerlContext ctx)
   berl_encoder->camera_buffer =
     wgpuDeviceCreateBuffer(ctx->device, &buffer_desc);
 
-  WGPUBindGroupEntry entries[2] = {0, 0};
+  WGPUBindGroupEntry entries[1] = {0};
+
   entries[0].nextInChain = NULL;
   entries[0].binding = 0;
-  entries[0].sampler = ctx->sampler;
-
-  entries[1].nextInChain = NULL;
-  entries[1].binding = 1;
-  entries[1].buffer = berl_encoder->camera_buffer;
-  entries[1].offset = 0;
-  entries[1].size = sizeof(mat4);
+  entries[0].buffer = berl_encoder->camera_buffer;
+  entries[0].offset = 0;
+  entries[0].size = sizeof(mat4);
 
   WGPUBindGroupDescriptor bind_group_desc = {
     .nextInChain = NULL,
     .label = NULL,
     .layout = ctx->pipeline_3d.global_bind_group_layout,
-    .entryCount = 2,
+    .entryCount = 1,
     .entries = entries,
   };
   berl_encoder->global_bind_group =

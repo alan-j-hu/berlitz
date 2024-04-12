@@ -44,6 +44,7 @@ struct BerlTextureImpl {
 };
 
 struct BerlMaterialImpl {
+  WGPUSampler sampler;
   WGPUBindGroup bind_group;
 };
 

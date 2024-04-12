@@ -48,34 +48,34 @@ void BerlPipeline3DInit(BerlContext ctx, struct BerlPipeline3d* pipeline)
   };
 
   {
-    WGPUBindGroupLayoutEntry entries[2] = {0, 0};
+    WGPUBindGroupLayoutEntry entries[1] = {0};
     entries[0].binding = 0;
-    entries[0].visibility = WGPUShaderStage_Fragment;
-    entries[0].sampler.type = WGPUSamplerBindingType_Filtering;
-
-    entries[1].binding = 1;
-    entries[1].visibility = WGPUShaderStage_Vertex;
-    entries[1].buffer.type = WGPUBufferBindingType_Uniform;
-    entries[1].buffer.minBindingSize = sizeof(mat4);
+    entries[0].visibility = WGPUShaderStage_Vertex;
+    entries[0].buffer.type = WGPUBufferBindingType_Uniform;
+    entries[0].buffer.minBindingSize = sizeof(mat4);
 
     WGPUBindGroupLayoutDescriptor layout_desc = {0};
     layout_desc.nextInChain = NULL;
-    layout_desc.entryCount = 2;
+    layout_desc.entryCount = 1;
     layout_desc.entries = entries;
     pipeline->global_bind_group_layout =
       wgpuDeviceCreateBindGroupLayout(ctx->device, &layout_desc);
   }
 
   {
-    WGPUBindGroupLayoutEntry entries[1] = {0};
+    WGPUBindGroupLayoutEntry entries[2] = {0, 0};
     entries[0].binding = 0;
     entries[0].visibility = WGPUShaderStage_Fragment;
     entries[0].texture.sampleType = WGPUTextureSampleType_Float;
     entries[0].texture.viewDimension = WGPUTextureViewDimension_2D;
 
+    entries[1].binding = 1;
+    entries[1].visibility = WGPUShaderStage_Fragment;
+    entries[1].sampler.type = WGPUSamplerBindingType_Filtering;
+
     WGPUBindGroupLayoutDescriptor layout_desc = {0};
     layout_desc.nextInChain = NULL;
-    layout_desc.entryCount = 1;
+    layout_desc.entryCount = 2;
     layout_desc.entries = entries;
     pipeline->material_bind_group_layout =
       wgpuDeviceCreateBindGroupLayout(ctx->device, &layout_desc);
